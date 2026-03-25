@@ -1,26 +1,51 @@
 package com.example.weather.weather;
 
+import com.example.weather.localization.Localization;
+import com.example.weather.localization.LocalizationService;
+import com.example.weather.weather.dto.OpenWeatherResponseDTO;
+import com.example.weather.weather.dto.WeatherDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.example.weather.localization.LocalizationRepository;
+import java.time.LocalDateTime;
 
+@Service
+@RequiredArgsConstructor
 public class WeatherService {
 
-    private final WeatherAPIClient weatherAPIClient;
-    private final LocalizationRepository localizationRepository;
+    private static final long WEATHER_CACHE_HOURS = 3;
 
-    public WeatherService(WeatherAPIClient weatherAPIClient, LocalizationRepository localizationRepository) {
-        this.weatherAPIClient = weatherAPIClient;
-        this.localizationRepository = localizationRepository;
+    private final WeatherRepository weatherRepository;
+    private final LocalizationService localizationService;
+    private final WeatherApiClient weatherApiClient;
+
+    @Transactional
+    public WeatherDTO getWeatherForLocalization(Long localizationId) throws WeatherApiClient.WeatherRetrievalException {
+        Localization localization = localizationService.getLocalization(localizationId);
+
+        return weatherRepository.findTopByLocalizationIdOrderByFetchedAtDesc(localizationId)
+                .filter(weather -> !isExpired(weather))
+                .map(WeatherMapper::toDTO)
+                .orElseGet(() -> fetchAndSaveWeather(localization));
     }
 
-    public Weather getCurrentWeather(Long localizationId) throws WeatherAPIClient.WeatherRetrievalException {
-        var localization = localizationRepository.findById(localizationId)
-                .orElseThrow(() -> new RuntimeException("Localization not found: " + localizationId));
+    private WeatherDTO fetchAndSaveWeather(Localization localization) {
+        try {
+            OpenWeatherResponseDTO response = weatherApiClient.getCurrentWeather(localization);
+            Weather weather = WeatherMapper.toEntity(localization, response);
+            Weather savedWeather = weatherRepository.save(weather);
+            return WeatherMapper.toDTO(savedWeather);
+        } catch (WeatherApiClient.WeatherRetrievalException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        if (localization == null) {
-            throw new WeatherAPIClient.WeatherRetrievalException("Localization not found: " + localizationId);
+    private boolean isExpired(Weather weather) {
+        if (weather.getFetchedAt() == null) {
+            return true;
         }
 
-        return weatherAPIClient.getCurrentWeather(localization);
+        return weather.getFetchedAt().isBefore(LocalDateTime.now().minusHours(WEATHER_CACHE_HOURS));
     }
 }

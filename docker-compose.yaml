@@ -1,12 +1,17 @@
 services:
   postgres-database:
-    image: 'postgres:latest'
+    image: postgres:latest
     container_name: postgres-database
     ports:
-      - "${POSTGRES_PORT:-5433}:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: weatherForecast
-      POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      - ./data.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/02_data.sql:ro
+
+volumes:
+  postgres_data:

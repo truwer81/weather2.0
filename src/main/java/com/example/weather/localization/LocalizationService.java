@@ -13,7 +13,7 @@ public class LocalizationService {
     private final LocalizationRepository localizationRepository;
 
     @Transactional
-    public Localization createLocalization(String city, double longitude, double latitude, String region, String country) {
+    public Localization createLocalization(String city, Double longitude, Double latitude, String region, String country) {
         if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
             throw new IllegalArgumentException("Invalid longitude or latitude");
         }
@@ -28,10 +28,12 @@ public class LocalizationService {
         return localizationRepository.save(localization);
     }
 
+    @Transactional(readOnly = true)
     public List<Localization> getAllLocalizations() {
         return localizationRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Localization getLocalization(long localizationId) {
         return localizationRepository.findById(localizationId).orElse(null);
     }

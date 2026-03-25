@@ -1,4 +1,4 @@
-package com.example.weather.weather;
+package com.example.weather.weather.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,16 +9,36 @@ import lombok.Setter;
 
 import java.util.List;
 
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class WeatherResponseDTO {
+public class OpenWeatherResponseDTO {
 
     @JsonProperty("sys")
-    private SystemInfo systemInfo; // Klasa pomocnicza dla danych sys
+    private SystemInfo systemInfo;
+
+    @JsonProperty("dt")
+    private Long forecastTimestamp;
+
+    @JsonProperty("name")
+    private String cityName;
+
+    @JsonProperty("weather")
+    private List<WeatherDescription> weather;
+
+    @JsonProperty("main")
+    private MainInfo mainInfo;
+
+    @JsonProperty("wind")
+    private WindInfo windInfo;
+
+    @JsonProperty("clouds")
+    private CloudsInfo cloudsInfo;
+
+    @JsonProperty("coord")
+    private Coordinates coordinates;
 
     @Getter
     @Setter
@@ -29,14 +49,6 @@ public class WeatherResponseDTO {
         private String countryCode;
     }
 
-    @JsonProperty("dt")
-    private Long forecastTimestamp;
-    @JsonProperty("name")
-    private String cityName;
-
-    @JsonProperty("weather")
-    private List<WeatherDescription> weather; // Klasa pomocnicza dla danych weather
-
     @Getter
     @Setter
     @AllArgsConstructor
@@ -46,30 +58,29 @@ public class WeatherResponseDTO {
         private String description;
     }
 
-    @JsonProperty("main")
-    private MainInfo mainInfo; // Klasa pomocnicza dla danych main
-
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     public static class MainInfo {
         @JsonProperty("temp")
-        private Float temp;
-        @JsonProperty("feels_like")
-        private Float feelsLike;
-        @JsonProperty("temp_min")
-        private Float tempMin;
-        @JsonProperty("temp_max")
-        private Float tempMax;
-        @JsonProperty("pressure")
-        private Float pressure;
-        @JsonProperty("humidity")
-        private Float humidity;
-    }
+        private Double temp;
 
-    @JsonProperty("wind")
-    private WindInfo windInfo; // Klasa pomocnicza dla danych wind
+        @JsonProperty("feels_like")
+        private Double feelsLike;
+
+        @JsonProperty("temp_min")
+        private Double tempMin;
+
+        @JsonProperty("temp_max")
+        private Double tempMax;
+
+        @JsonProperty("pressure")
+        private Double pressure;
+
+        @JsonProperty("humidity")
+        private Double humidity;
+    }
 
     @Getter
     @Setter
@@ -77,13 +88,11 @@ public class WeatherResponseDTO {
     @NoArgsConstructor
     public static class WindInfo {
         @JsonProperty("speed")
-        private Float windSpeed;
-        @JsonProperty("deg")
-        private Float windDeg;
-    }
+        private Double windSpeed;
 
-    @JsonProperty("clouds")
-    private CloudsInfo cloudsInfo; // Klasa pomocnicza dla danych clouds
+        @JsonProperty("deg")
+        private Double windDeg;
+    }
 
     @Getter
     @Setter
@@ -91,11 +100,8 @@ public class WeatherResponseDTO {
     @NoArgsConstructor
     public static class CloudsInfo {
         @JsonProperty("all")
-        private Float cloudsAll;
+        private Double cloudsAll;
     }
-
-    @JsonProperty("coord")
-    private Coordinates coordinates; // Klasa pomocnicza dla danych coord
 
     @Getter
     @Setter
@@ -103,9 +109,9 @@ public class WeatherResponseDTO {
     @NoArgsConstructor
     public static class Coordinates {
         @JsonProperty("lon")
-        private Float longitude;
+        private Double longitude;
+
         @JsonProperty("lat")
-        private Float latitude;
+        private Double latitude;
     }
 }
-
