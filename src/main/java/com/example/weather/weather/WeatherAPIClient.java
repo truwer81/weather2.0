@@ -1,9 +1,10 @@
-package com.example.server.weather;
+package com.example.weather.weather;
 
 import com.example.config.AppConfig;
-import com.example.server.localization.Localization;
+import com.example.weather.localization.Localization;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,18 +14,20 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-
+@Component
 public class WeatherAPIClient {
 
-    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
-
-    private final HttpClient httpClient;
+    private HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper;
     private final String apiKey;
+    private final String baseUrl;
+    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
 
-    public WeatherAPIClient(HttpClient httpClient, ObjectMapper objectMapper) {
+
+    public WeatherAPIClient(HttpClient httpClient, ObjectMapper objectMapper, String baseUrl) {
         this.httpClient = httpClient;
         this.objectMapper = objectMapper;
+        this.baseUrl = baseUrl;
         this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.apiKey = AppConfig.getRequired("OPENWEATHER_API_KEY");
     }

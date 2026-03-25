@@ -1,6 +1,6 @@
-package com.example.server.weather;
+package com.example.weather.weather;
 
-import com.example.server.localization.Localization;
+import com.example.weather.localization.Localization;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

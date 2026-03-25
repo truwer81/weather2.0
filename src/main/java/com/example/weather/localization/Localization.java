@@ -1,4 +1,4 @@
-package com.example.server.localization;
+package com.example.weather.localization;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

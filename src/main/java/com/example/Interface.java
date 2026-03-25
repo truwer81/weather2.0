@@ -1,7 +1,6 @@
 package com.example;
 
-import com.example.server.Server;
-import com.example.server.localization.WeatherDataQueryDTO;
+import com.example.weather.localization.WeatherDataQueryDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,10 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+//todo: delete
 
 public class Interface {
-    public static void main(String[] args) throws Server.HttpRequestException {
-        Server server = new Server();
+    public static void main(String[] args) {
+
 
         Scanner scanner = new Scanner(System.in);
         System.out.println("Witaj w aplikacji pogodowej!");
@@ -40,59 +40,14 @@ public class Interface {
                     double longitude = readDouble(scanner, "Podaj długość geograficzną: ");
 
                     String json = "{\"city\":\"" + city + "\",\"country\":\"" + country + "\",\"region\":\"" + region + "\",\"latitude\":" + latitude + ",\"longitude\":" + longitude + "}";
-                    String responsePOST = server.callServer("POST", "/localizations", json);
-                    Cl.printlnC(Cl.BLUEs, 2, "\nZorbione - odpowiedź: " + responsePOST);
+                    Cl.printlnC(Cl.BLUEs, 2, "\nZorbione - odpowiedź: " );
                     break;
                 case 2:
 
-                    String responseGET = server.callServer("GET", "/localizations", null);
-                    try {
-                        List<WeatherDataQueryDTO> localizations = objectMapper.readValue(responseGET, new TypeReference<List<WeatherDataQueryDTO>>() {
-                        });
 
-                        if (localizations.isEmpty()) {
-                            Cl.printlnC(Cl.REDs, 2, "Brak zapisanych miast.");
-                        } else {
-                            Cl.printlnC(Cl.BLUEs, 2, "\nLista zapisanych miast:");
-                            System.out.println("(id: miasto, kraj)");
-                            localizations.forEach(localization -> Cl.printlnC(Cl.GREENs, 2, "nr " + localization.getId() + ": " + localization.getCity() + ", " + localization.getCountry()));
-                        }
-                    } catch (JsonProcessingException e) {
-                        Cl.printlnC(Cl.REDs, 2, "Nie udało się przetworzyć odpowiedzi: " + e.getMessage());
-                    }
                     break;
                 case 3:
-                    String responseGetLocalizations = server.callServer("GET", "/localizations", null);
 
-                    try {
-                        List<WeatherDataQueryDTO> localizations = objectMapper.readValue(responseGetLocalizations, new TypeReference<List<WeatherDataQueryDTO>>() {
-                        });
-                        if (localizations.isEmpty()) {
-                            Cl.printlnC(Cl.REDs, 2, "Brak zapisanych miast.");
-                        } else {
-                            Cl.printlnC(Cl.BLUEs, 2, "\nLista zapisanych miast:");
-                            localizations.forEach(localization -> Cl.printlnC(Cl.GREENs, 2, "nr " + localization.getId() + ": " + localization.getCity() + ", " + localization.getCountry()));
-
-                            // Pytanie o wybór miasta
-                            Cl.printlnC(Cl.BLUEs, 2, "\nWybierz id miasta dla którego chcesz sprawdzić pogodę:");
-                            long cityId = readLong(scanner, "Wybierz id miasta: ");
-
-
-//                            String dateString = "2024-02-24";
-                            // Pytanie o datę - ta funkcja wymaga subskrypcji, w razie wykupienia można ją przywrócić.
-                            //Cl.printlnC(Cl.BLUEs, 2, "Podaj datę (RRRR-MM-DD):");
-                            //String dateString = scanner.nextLine();
-
-                            String weatherResponse = server.callServer("GET", "/weather?localization=" + cityId, null);
-                            Optional<WeatherDataQueryDTO> myCity = localizations.stream()
-                                    .filter(localization -> cityId == localization.getId())
-                                    .findFirst();
-                            myCity.ifPresent(c -> Cl.printlnC(Cl.GREENs, 2, "\nPogoda w lokalizacji: " + c.getCity()));
-                            Cl.printlnC(Cl.GREENs, 3, weatherResponse);
-                        }
-                    } catch (JsonProcessingException e) {
-                        Cl.printlnC(Cl.REDs, 2, "Nie udało się przetworzyć odpowiedzi: " + e.getMessage());
-                    }
                     break;
 
                 case 0:

@@ -1,8 +1,7 @@
-package com.example.server.weather;
+package com.example.weather.weather;
 
 
-import com.example.server.localization.Localization;
-import com.example.server.localization.LocalizationRepository;
+import com.example.weather.localization.LocalizationRepository;
 
 public class WeatherService {
 
@@ -15,7 +14,8 @@ public class WeatherService {
     }
 
     public Weather getCurrentWeather(Long localizationId) throws WeatherAPIClient.WeatherRetrievalException {
-        Localization localization = localizationRepository.findOne(localizationId);
+        var localization = localizationRepository.findById(localizationId)
+                .orElseThrow(() -> new RuntimeException("Localization not found: " + localizationId));
 
         if (localization == null) {
             throw new WeatherAPIClient.WeatherRetrievalException("Localization not found: " + localizationId);

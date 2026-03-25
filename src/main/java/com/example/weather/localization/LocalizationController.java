@@ -1,10 +1,9 @@
-package com.example.server.localization;
+package com.example.weather.localization;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 // @RequiredArgsConstructor - zamiast konstuktora
 public class LocalizationController {

@@ -1,4 +1,4 @@
-package com.example.server.weather;
+package com.example.weather.weather;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
