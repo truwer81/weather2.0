@@ -37,4 +37,11 @@ public class LocalizationService {
     public Localization getLocalization(long localizationId) {
         return localizationRepository.findById(localizationId).orElse(null);
     }
+
+    @Transactional
+    public void deleteLocalization(long localizationId) {
+        var localization = localizationRepository.findById(localizationId)
+                .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
+        localizationRepository.delete(localization);
+    }
 }

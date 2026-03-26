@@ -4,6 +4,7 @@ import com.example.weather.localization.dto.CreateLocalizationRequest;
 import com.example.weather.localization.dto.LocalizationDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,5 +35,11 @@ public class LocalizationController {
                 .stream()
                 .map(LocalizationDTO::from)
                 .toList();
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteCity(@PathVariable Long id) {
+        localizationService.deleteLocalization(id);
     }
 }
