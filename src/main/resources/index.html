@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Weather App</h1>
+
+    <section class="panel">
+        <h2>Add city</h2>
+        <form id="city-form">
+            <div class="grid">
+                <input type="text" id="city" placeholder="City" required>
+                <input type="text" id="country" placeholder="Country" required>
+                <input type="text" id="region" placeholder="Region">
+                <input type="number" step="any" id="longitude" placeholder="Longitude" required>
+                <input type="number" step="any" id="latitude" placeholder="Latitude" required>
+            </div>
+            <button type="submit">Add city</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Saved cities</h2>
+        <div id="message"></div>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Region</th>
+                <th>Longitude</th>
+                <th>Latitude</th>
+                <th>Temperature</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="cities-table-body"></tbody>
+        </table>
+    </section>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
