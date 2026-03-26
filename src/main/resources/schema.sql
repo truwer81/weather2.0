@@ -5,7 +5,7 @@ create table if not exists localizations (
     country varchar(255) not null,
     longitude double precision,
     latitude double precision,
-    order_by bigint not null
+    sort_order bigint not null
     );
 
 CREATE TABLE weather (
@@ -34,4 +34,4 @@ CREATE INDEX idx_weather_localization_fetched_at
     ON weather(localization_id, fetched_at DESC);
 
 ALTER TABLE localizations
-    ADD CONSTRAINT uk_my_table_list_id_order_by UNIQUE (order_by);
+    ADD CONSTRAINT uk_my_table_list_id_order_by UNIQUE (sort_order);
