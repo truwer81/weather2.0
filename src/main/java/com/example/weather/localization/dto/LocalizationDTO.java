@@ -8,7 +8,8 @@ public record LocalizationDTO(
         String country,
         String region,
         Double longitude,
-        Double latitude
+        Double latitude,
+        Long sortOrder
 ) {
     public static LocalizationDTO from(Localization localization) {
         return new LocalizationDTO(
@@ -17,7 +18,8 @@ public record LocalizationDTO(
                 localization.getCountry(),
                 localization.getRegion(),
                 localization.getLongitude(),
-                localization.getLatitude()
+                localization.getLatitude(),
+                localization.getSortOrder()
         );
     }
 }

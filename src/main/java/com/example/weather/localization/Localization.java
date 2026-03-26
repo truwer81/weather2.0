@@ -22,4 +22,6 @@ public class Localization {
     private String region;
     private Double longitude;
     private Double latitude;
+    @Column(name = "sort_order")
+    private Long sortOrder;
 }

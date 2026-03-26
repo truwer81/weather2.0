@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather 2.0</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <h1>Weather 2.0</h1>
+        <p class="subtitle">Current weather overview for saved cities</p>
+    </header>
+
+    <section class="panel">
+        <div class="panel-header">
+            <h2>Saved cities</h2>
+            <button id="reload-all-btn" type="button">Reload list</button>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th><span class="th-title">City</span></th>
+                    <th><span class="th-title">Region</span></th>
+                    <th><span class="th-title">Country</span></th>
+                    <th>
+                        <span class="th-title">Temperature</span>
+                        <span class="th-unit">°C</span>
+                    </th>
+                    <th>
+                        <span class="th-title">Feels like</span>
+                        <span class="th-unit">°C</span>
+                    </th>
+                    <th>
+                        <span class="th-title">Humidity</span>
+                        <span class="th-unit">%</span>
+                    </th>
+                    <th>
+                        <span class="th-title">Pressure</span>
+                        <span class="th-unit">hPa</span>
+                    </th>
+                    <th>
+                        <span class="th-title">Wind speed</span>
+                        <span class="th-unit">km/h</span>
+                    </th>
+                    <th>
+                        <span class="th-title">Cloudiness</span>
+                        <span class="th-unit">%</span>
+                    </th>
+                    <th><span class="th-title">Description</span></th>
+                    <th><span class="th-title">Order</span></th>
+                    <th><span class="th-title">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody id="cities-table-body"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Add city</h2>
+        <form id="city-form">
+            <div class="grid">
+                <input type="text" id="city" placeholder="City" required>
+                <input type="text" id="region" placeholder="Region">
+                <input type="text" id="country" placeholder="Country" required>
+                <input type="number" step="any" id="longitude" placeholder="Longitude" required>
+                <input type="number" step="any" id="latitude" placeholder="Latitude" required>
+            </div>
+            <button type="submit">Add city</button>
+        </form>
+    </section>
+</div>
+
+<footer class="footer">
+    <div>Created by Jakub Heppner</div>
+    <div>jakub.heppner@gmail.com</div>
+    <div>Version 2.0</div>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

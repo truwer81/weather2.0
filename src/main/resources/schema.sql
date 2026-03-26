@@ -1,10 +1,11 @@
 create table if not exists localizations (
-                                             id bigint generated always as identity primary key,
-                                             city varchar(255) not null,
+    id bigint generated always as identity primary key,
+    city varchar(255) not null,
     region varchar(255),
     country varchar(255) not null,
     longitude double precision,
-    latitude double precision
+    latitude double precision,
+    order_by bigint not null
     );
 
 CREATE TABLE weather (
@@ -31,3 +32,6 @@ CREATE INDEX idx_weather_localization_id
 
 CREATE INDEX idx_weather_localization_fetched_at
     ON weather(localization_id, fetched_at DESC);
+
+ALTER TABLE localizations
+    ADD CONSTRAINT uk_my_table_list_id_order_by UNIQUE (order_by);

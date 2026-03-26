@@ -1,5 +1,6 @@
 package com.example.weather.localization;
 
+import com.example.weather.localization.dto.OrderByDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,14 @@ public class LocalizationService {
             region = null;
         }
 
-        Localization localization = new Localization(null, city, country, region, longitude, latitude);
+        var topOrderBy=0L;
+        Localization lastLocalization = localizationRepository.findTopByOrderBySortOrderDesc().orElse(null);
+
+        if (lastLocalization != null) {
+            topOrderBy=lastLocalization.getSortOrder()+1;
+        }
+
+        var localization = new Localization(null, city, country, region, longitude, latitude, topOrderBy);
         return localizationRepository.save(localization);
     }
 
@@ -43,5 +51,29 @@ public class LocalizationService {
         var localization = localizationRepository.findById(localizationId)
                 .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
         localizationRepository.delete(localization);
+    }
+
+    @Transactional
+    public List<Localization> saveDisplayOrder(List<OrderByDTO> orders) {
+        boolean unique = orders.size() ==
+                orders.stream()
+                        .map(OrderByDTO::sortOrder)
+                        .distinct()
+                        .count();
+
+        if (!unique) {
+            throw new IllegalArgumentException("Order must be unique");
+        }
+
+        // temporary order
+        for (OrderByDTO item : orders) {
+            localizationRepository.updateOrderBy(item.localizationId(), -item.sortOrder() - 1000);
+        }
+
+        // order from OrderByDTO
+        for (OrderByDTO item : orders) {
+            localizationRepository.updateOrderBy(item.localizationId(), item.sortOrder());
+        }
+        return localizationRepository.findAll();
     }
 }
