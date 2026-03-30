@@ -36,28 +36,47 @@ Before running the project, make sure you have:
 - Maven installed
 - Docker and Docker Compose installed
 - IntelliJ IDEA installed
-- `.env.dev` and `.env.prod` files created locally
+- `.env` file created locally
 
 Do not commit real secrets such as API keys to the repository.
 
 ---
 
-## 3. Environment files
+## 3. Environment configuration
 
-The project uses two separate environment files:
+The project uses a single `.env` file for Docker-based environments.
 
-- `.env.dev` – configuration for IDE mode
-- `.env.prod` – configuration for full Docker mode
+Example `.env`:
+```env
+POSTGRES_DB=weatherForecast
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+OPEN_WEATHER_API_KEY=your_api_key
+SERVER_PORT=8080
+```
 
-### `.env.dev`
-Used when:
-- PostgreSQL runs in Docker
-- the application runs from IntelliJ IDEA
+Important:
 
-### `.env.prod`
-Used when:
-- PostgreSQL runs in Docker
-- the application also runs in Docker
+- Docker Compose uses `.env` automatically via the `--env-file` flag
+- The Spring Boot application started from IntelliJ DOES NOT read `.env` automatically
+- For DEV mode, you must provide `OPEN_WEATHER_API_KEY` manually in IntelliJ Run Configuration
+
+
+## Environment differences
+
+The application uses different database connection strategies depending on the environment:
+
+- DEV (IntelliJ):
+    - connects to database via: localhost:5433
+    - uses fallback configuration from application.properties
+
+- PROD (Docker):
+    - connects to database via: postgres-database:5432
+    - connection is provided via DB_URL environment variable in docker-compose
+
+This difference is required because:
+- IntelliJ runs on the host machine
+- Docker containers communicate through internal Docker network
 
 ---
 
@@ -85,7 +104,7 @@ docker compose -f docker-compose.dev.yml -p weather-dev down -v
 
 ### Application URL
 When running in IDE mode, the application is available at:
-'http://localhost:8080'
+http://localhost:8080
 
 This requires starting the Spring Boot application manually from IntelliJ IDEA.
 
@@ -96,7 +115,7 @@ You can connect to the DEV database from PgAdmin or IntelliJ using:
 - Host: localhost
 - Port: 5433
 - Database: weatherForecast
-- User, password: value from .env.dev
+- User, password: value from .env (used by Docker container)
 
 ---
 
@@ -107,7 +126,7 @@ In this mode:
 - PostgreSQL runs in Docker
 - the Spring Boot application also runs in Docker
 
-### Build the application and Start the full stack
+### Build the application and start the full stack
 
 ```shell
 mvn clean package
@@ -126,18 +145,32 @@ docker compose -f docker-compose.prod.yml -p weather-prod down
 docker compose -f docker-compose.prod.yml -p weather-prod down -v
 ```
 
+## Troubleshooting
+
+If the application container restarts repeatedly:
+
+- Check logs:
+```shell
+  docker compose --env-file .env -f docker-compose.prod.yml -p weather-prod logs -f weather-app
+```
+
+- Most common issue:
+  wrong database URL (e.g. localhost instead of postgres-database)
+
+
 ### Application URL
 When the full Docker stack is running, the application is available at:
-'http://localhost:8081'
+http://localhost:8081
 
-Database connection in PROD mode
+
+### Database connection in PROD mode
 
 You can connect to the PROD database from PgAdmin or IntelliJ using:
 
 - Host: localhost
 - Port: 5434
 - Database: weatherForecast
-- User, password: value from .env.prod
+- User, password: value from .env
 
 ---
 
