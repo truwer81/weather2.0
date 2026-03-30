@@ -1,4 +1,5 @@
-.env
+.env.dev
+.env.prod
 .idea
 target/
 !.mvn/wrapper/maven-wrapper.jar
