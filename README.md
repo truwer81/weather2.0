@@ -70,7 +70,7 @@ In this mode:
 
 ### Start the database
 ```shell
-docker compose --env-file .env.dev -f docker-compose.dev.yml -p weather-dev up -d
+docker compose --env-file .env -f docker-compose.dev.yml -p weather-dev up -d
 ```
 
 ### Stop the database
@@ -113,7 +113,7 @@ In this mode:
 mvn clean package
 ```
 ```shell
-docker compose --env-file .env.prod -f docker-compose.prod.yml -p weather-prod up -d --build
+docker compose --env-file .env -f docker-compose.prod.yml -p weather-prod up -d --build
 ```
 
 ### Stop the full stack
