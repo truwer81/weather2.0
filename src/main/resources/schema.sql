@@ -27,6 +27,41 @@ CREATE TABLE weather (
                                  ON DELETE CASCADE
 );
 
+CREATE TABLE forecast (
+                          id BIGSERIAL PRIMARY KEY,
+
+                          localization_id BIGINT NOT NULL,
+
+                          forecast_time TIMESTAMP NOT NULL, -- dt (czas prognozy)
+                          provider_timestamp TIMESTAMP,     -- opcjonalnie (jeśli chcesz)
+
+                          temperature DOUBLE PRECISION,
+                          feels_like DOUBLE PRECISION,
+                          pressure DOUBLE PRECISION,
+                          humidity INTEGER,
+
+                          wind_speed DOUBLE PRECISION,
+                          wind_deg DOUBLE PRECISION,
+
+                          description VARCHAR(255),
+
+                          precipitation_probability DOUBLE PRECISION, -- pop
+                          rain_volume DOUBLE PRECISION,               -- rain["3h"]
+
+                          fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+                          CONSTRAINT fk_forecast_localization
+                              FOREIGN KEY (localization_id)
+                                  REFERENCES localizations(id)
+                                  ON DELETE CASCADE
+);
+
+CREATE INDEX idx_forecast_localization_time
+    ON forecast(localization_id, forecast_time);
+
+CREATE INDEX idx_forecast_fetched_at
+    ON forecast(localization_id, fetched_at DESC);
+
 CREATE INDEX idx_weather_localization_id
     ON weather(localization_id);
 

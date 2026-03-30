@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OpenWeatherResponseDTO {
+public class WeatherResponseDTO {
 
     @JsonProperty("sys")
     private SystemInfo systemInfo;
