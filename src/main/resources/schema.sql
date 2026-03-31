@@ -32,8 +32,7 @@ CREATE TABLE forecast (
 
                           localization_id BIGINT NOT NULL,
 
-                          forecast_time TIMESTAMP NOT NULL, -- dt (czas prognozy)
-                          provider_timestamp TIMESTAMP,     -- opcjonalnie (jeśli chcesz)
+                          forecast_time TIMESTAMP NOT NULL,
 
                           temperature DOUBLE PRECISION,
                           feels_like DOUBLE PRECISION,
@@ -45,8 +44,10 @@ CREATE TABLE forecast (
 
                           description VARCHAR(255),
 
-                          precipitation_probability DOUBLE PRECISION, -- pop
-                          rain_volume DOUBLE PRECISION,               -- rain["3h"]
+                          precipitation_probability DOUBLE PRECISION,
+                          rain_volume DOUBLE PRECISION,
+                          snow_volume DOUBLE PRECISION,
+                          clouds_all DOUBLE PRECISION,
 
                           fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

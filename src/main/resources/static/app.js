@@ -5,6 +5,8 @@ const reloadAllBtn = document.getElementById("reload-all-btn");
 
 let citiesState = [];
 
+console.log("NEW APP.JS LOADED");
+
 document.addEventListener("DOMContentLoaded", async () => {
     await loadCities();
 });
@@ -101,12 +103,12 @@ function buildRow(city, weather) {
         <td>${city.city ?? ""}</td>
         <td>${city.region ?? ""}</td>
         <td>${city.country ?? ""}</td>
-        <td>${formatValue(weather?.temperature)}</td>
-        <td>${formatValue(weather?.feelsLike)}</td>
-        <td>${formatValue(weather?.humidity)}</td>
-        <td>${formatValue(weather?.pressure)}</td>
+        <td>${formatNumber(weather?.temperature, 1)}</td>
+        <td>${formatNumber(weather?.feelsLike, 1)}</td>
+        <td>${formatNumber(weather?.humidity, 0)}</td>
+        <td>${formatNumber(weather?.pressure, 0)}</td>
         <td>${formatWind(weather?.windSpeed)}</td>
-        <td>${formatValue(weather?.cloudsPercentage)}</td>
+        <td>${formatNumber(weather?.cloudsAll ?? weather?.cloudsPercentage, 0)}</td>
         <td>${weather?.description ?? "-"}</td>
         <td>
             <div class="order-actions">
@@ -116,11 +118,16 @@ function buildRow(city, weather) {
         </td>
         <td>
             <div class="actions">
+                <button class="action-btn forecast-btn">Forecast</button>
                 <button class="action-btn refresh-btn">Refresh</button>
                 <button class="action-btn delete-btn">Delete</button>
             </div>
         </td>
     `;
+
+    tr.querySelector(".forecast-btn").addEventListener("click", async () => {
+        await toggleForecastRow(tr, city.id);
+    });
 
     tr.querySelector(".refresh-btn").addEventListener("click", async () => {
         try {
@@ -158,6 +165,261 @@ function buildRow(city, weather) {
     });
 
     return tr;
+}
+
+async function toggleForecastRow(cityRow, cityId) {
+    const nextRow = cityRow.nextElementSibling;
+
+    if (nextRow && nextRow.classList.contains("forecast-details-row")) {
+        nextRow.remove();
+        return;
+    }
+
+    const detailsRow = document.createElement("tr");
+    detailsRow.className = "forecast-details-row";
+    detailsRow.innerHTML = `
+        <td colspan="12">
+            <div class="forecast-loading">Loading forecast...</div>
+        </td>
+    `;
+
+    cityRow.insertAdjacentElement("afterend", detailsRow);
+
+    try {
+        const forecast = await loadForecast(cityId);
+        detailsRow.innerHTML = `
+            <td colspan="12">
+                ${buildForecastTable(forecast)}
+            </td>
+        `;
+    } catch (error) {
+        detailsRow.innerHTML = `
+            <td colspan="12">
+                <div class="message-error">Could not load forecast: ${error.message}</div>
+            </td>
+        `;
+    }
+}
+
+async function loadForecast(cityId) {
+    const response = await fetch(`/api/weather/forecast?cityId=${cityId}`);
+
+    if (!response.ok) {
+        const error = await tryReadError(response);
+        throw new Error(error);
+    }
+
+    return await response.json();
+}
+
+function buildForecastTable(items) {
+    if (!items || items.length === 0) {
+        return `<div class="forecast-empty">No forecast data</div>`;
+    }
+
+    const grouped = groupForecastByDay(items);
+
+    let dayIndex = 0;
+
+    const rows = grouped.map(group => {
+        const dayClass = dayIndex % 2 === 0 ? "forecast-day-even" : "forecast-day-odd";
+        dayIndex++;
+
+        return group.items.map((item, index) => {
+            const dayCell = index === 0
+                ? `
+                    <td class="forecast-day-cell ${dayClass}" rowspan="${group.items.length}">
+                        <div class="forecast-day-name">${group.dayName}</div>
+                        <div class="forecast-day-label">${group.relativeLabel}</div>
+                        <div class="forecast-day-date">(${group.shortDate})</div>
+                    </td>
+                `
+                : "";
+
+            return `
+                <tr class="${dayClass}">
+                    ${dayCell}
+                    <td>${formatHour(item.dateTime)}</td>
+                    <td class="${getTemperatureClass(item.temperature)}">${formatNumber(item.temperature, 1)}</td>
+                    <td class="${getTemperatureClass(item.feelsLike)}">${formatNumber(item.feelsLike, 1)}</td>
+                    <td>${formatWind(item.windSpeed)}</td>
+                    <td class="${getRainClass(item.rainVolume)}">${formatNumber(item.rainVolume, 1)}</td>
+                    <td class="${getSnowClass(item.snowVolume)}">${formatNumber(item.snowVolume, 1)}</td>
+                    <td class="${getPrecipitationClass(item.precipitationProbability)}">${formatPercentValue(item.precipitationProbability)}</td>
+                    <td>${item.description ?? "-"}</td>
+                </tr>
+            `;
+        }).join("");
+    }).join("");
+
+    return `
+        <div class="forecast-wrapper">
+            <table class="forecast-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Day</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Hour</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Temp.</span>
+                                <span class="th-unit">°C</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Feels<br>like</span>
+                                <span class="th-unit">°C</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Wind</span>
+                                <span class="th-unit">km/h</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Rain</span>
+                                <span class="th-unit">mm</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Snow</span>
+                                <span class="th-unit">mm</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Precip.<br>chance</span>
+                                <span class="th-unit">%</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="th-stack">
+                                <span class="th-title">Description</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
+}
+
+
+function groupForecastByDay(items) {
+    const groups = new Map();
+
+    for (const item of items) {
+        const date = new Date(item.dateTime);
+        const key = getDateKey(date);
+
+        if (!groups.has(key)) {
+            groups.set(key, {
+                key,
+                date,
+                items: []
+            });
+        }
+
+        groups.get(key).items.push(item);
+    }
+
+    return Array.from(groups.values()).map(group => ({
+        ...group,
+        dayName: formatDayName(group.date),
+        relativeLabel: formatRelativeDayLabel(group.date),
+        shortDate: formatShortDate(group.date)
+    }));
+}
+
+function getDateKey(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
+function formatDayName(date) {
+    return date.toLocaleDateString("pl-PL", { weekday: "long" });
+}
+
+function formatShortDate(date) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    return `${day}.${month}`;
+}
+
+function formatRelativeDayLabel(date) {
+    const today = new Date();
+    const current = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const diffMs = target - current;
+    const diffDays = Math.round(diffMs / 86400000);
+
+    if (diffDays === 0) return "dzisiaj";
+    if (diffDays === 1) return "jutro";
+    if (diffDays === -1) return "wczoraj";
+
+    return "";
+}
+
+function formatHour(value) {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    return date.toLocaleTimeString("pl-PL", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function formatNumber(value, digits = 1) {
+    if (value === null || value === undefined) return "-";
+    return Number(value).toFixed(digits);
+}
+
+function formatPercentValue(value) {
+    if (value === null || value === undefined) return "-";
+    return Math.round(Number(value) * 100);
+}
+
+function getTemperatureClass(value) {
+    if (value === null || value === undefined) return "";
+    return Number(value) < 0 ? "value-cold" : "value-warm";
+}
+
+function getRainClass(value) {
+    if (value === null || value === undefined || Number(value) === 0) {
+        return "value-muted";
+    }
+    return "value-rain";
+}
+
+function getSnowClass(value) {
+    if (value === null || value === undefined || Number(value) === 0) {
+        return "value-muted";
+    }
+    return "value-snow";
+}
+
+function getPrecipitationClass(value) {
+    if (value === null || value === undefined || Number(value) === 0) {
+        return "value-muted";
+    }
+    return "value-rain";
 }
 
 async function moveCity(cityId, direction) {
@@ -237,13 +499,6 @@ async function tryReadError(response) {
     } catch {
         return `Request failed with status ${response.status}`;
     }
-}
-
-function formatValue(value) {
-    if (value === null || value === undefined) {
-        return "-";
-    }
-    return value;
 }
 
 function formatWind(value) {

@@ -7,15 +7,17 @@ import com.example.weather.weather.dto.ForecastResponseDTO;
 import com.example.weather.weather.dto.WeatherDTO;
 import com.example.weather.weather.dto.WeatherResponseDTO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class WeatherService {
+public class OpenWeatherService {
 
     private static final long WEATHER_CACHE_HOURS = 1;
 
@@ -38,12 +40,14 @@ public class WeatherService {
     @Transactional
     public List<ForecastDTO> getForecastsForLocalization(Long localizationId) {
         var localization = localizationService.getLocalization(localizationId);
-
         var forecasts = forecastRepository
                 .findAllByLocalizationIdOrderByForecastTimeAsc(localizationId);
-
-        if (!isExpired(forecasts.getFirst())) {
-            return ForecastMapper.toForecastDTO(forecasts);
+        if (forecasts.isEmpty()) {
+            return fetchAndSaveForecast(localization);
+        }
+        var firstForecast = forecasts.getFirst();
+        if (!isExpired(firstForecast)) {
+            return ForecastMapper.toDTOList(forecasts);
         }
 
         return fetchAndSaveForecast(localization);
@@ -64,13 +68,19 @@ public class WeatherService {
         try {
             ForecastResponseDTO response = openWeatherApiClient.getForecast(localization);
 
-            var forecasts = WeatherMapper.toEntities(localization, response);
-
-            forecastRepository.deleteByLocalization(localization.getId());
+            var forecasts = ForecastMapper.toEntities(localization, response);
+//            forecasts.forEach(f -> log.info(
+//                    "Mapped forecast: time={}, pop={}, rain={}, clouds={}",
+//                    f.getForecastTime(),
+//                    f.getPrecipitationProbability(),
+//                    f.getRainVolume(),
+//                    f.getCloudsAll()
+//            ));
+            forecastRepository.deleteByLocalizationId(localization.getId());
 
             var savedForecast = forecastRepository.saveAll(forecasts);
 
-            return ForecastMapper.toForecastDTO(savedForecast);
+            return ForecastMapper.toDTOList(savedForecast);
 
         } catch (OpenWeatherApiClient.WeatherRetrievalException e) {
             throw new RuntimeException(e);

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ForecastRepository extends JpaRepository<Forecast, Long> {
 
-    void deleteByLocalization(Long localizationId);
+    void deleteByLocalizationId(Long localizationId);
 
     List<Forecast> findAllByLocalizationIdOrderByForecastTimeAsc(Long localizationId);
 }

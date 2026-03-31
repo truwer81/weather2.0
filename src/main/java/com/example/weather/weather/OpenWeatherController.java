@@ -15,16 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpenWeatherController {
 
-    private final WeatherService weatherService;
+    private final OpenWeatherService openWeatherService;
 
     @GetMapping
     public WeatherDTO getWeather(@RequestParam Long cityId) throws OpenWeatherApiClient.WeatherRetrievalException {
-        return weatherService.getWeatherForLocalization(cityId);
+        return openWeatherService.getWeatherForLocalization(cityId);
     }
 
     @GetMapping("/forecast")
     public List<ForecastDTO> getForecasts(@RequestParam Long cityId) throws OpenWeatherApiClient.WeatherRetrievalException {
-        return weatherService.getForecastsForLocalization(cityId);
+        return openWeatherService.getForecastsForLocalization(cityId);
     }
 
 }

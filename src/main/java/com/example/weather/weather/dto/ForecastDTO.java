@@ -4,15 +4,15 @@ import java.time.LocalDateTime;
 
 public record ForecastDTO(
         LocalDateTime dateTime,
-        double temperature,
-        double feelsLike,
-        double pressure,
-        double humidity,
-        double windSpeed,
-        double windDirection,
-        double rainVolume,
-        double snowVolume,
+        Double temperature,
+        Double feelsLike,
+        Double pressure,
+        Double humidity,
+        Double windSpeed,
+        Double windDirection,
+        Double rainVolume,
+        Double snowVolume,
         String description,
-        double precipitationProbability,
-        double cloudsAll
+        Double precipitationProbability,
+        Double cloudsAll
 ) {}

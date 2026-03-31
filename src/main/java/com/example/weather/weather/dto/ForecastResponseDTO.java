@@ -19,7 +19,13 @@ public record ForecastResponseDTO(
             CloudsDTO clouds,
             Double pop,
             RainDTO rain,
+            SnowDTO snow,
             @JsonProperty("dt_txt") String dtTxt
+    ) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record SnowDTO(
+            @JsonProperty("3h") Double volumeLast3h
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
