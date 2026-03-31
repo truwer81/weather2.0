@@ -1,24 +1,17 @@
 package com.example.weather.weather;
 
 import com.example.weather.localization.Localization;
-import com.example.weather.weather.dto.ForecastResponseDTO;
 import com.example.weather.weather.dto.WeatherDTO;
 import com.example.weather.weather.dto.WeatherResponseDTO;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
 
 public final class WeatherMapper {
 
     private WeatherMapper() {
     }
-
-
-
 
 
     public static Weather toEntity(Localization localization, WeatherResponseDTO response) {
@@ -63,7 +56,7 @@ public final class WeatherMapper {
         if (response.getWeather() == null || response.getWeather().isEmpty()) {
             return null;
         }
-        return response.getWeather().get(0).getDescription();
+        return response.getWeather().getFirst().getDescription();
     }
 
     private static Double extractTemperature(WeatherResponseDTO response) {

@@ -87,6 +87,7 @@ public class Forecast {
                 ", forecastTime=" + forecastTime +
                 ", fetchedAt=" + fetchedAt +
                 ", rainVolume=" + rainVolume +
+                ", snowVolume=" + snowVolume +
                 ", precipitationProbability=" + precipitationProbability +
                 '}';
     }

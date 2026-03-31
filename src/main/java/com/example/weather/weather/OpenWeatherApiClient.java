@@ -6,9 +6,7 @@ import com.example.weather.weather.dto.WeatherResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
 import java.net.URI;
@@ -104,7 +102,7 @@ public class OpenWeatherApiClient {
                 + "&cnt=16";
     }
 
-    private String buildUrl(Localization localization, String url) throws WeatherRetrievalException {
+    private String buildUrl(Localization localization, String url) {
         return url
                 + "?lat=" + localization.getLatitude()
                 + "&lon=" + localization.getLongitude()

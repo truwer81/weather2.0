@@ -1,6 +1,5 @@
 package com.example.weather.weather;
 
-import com.example.weather.localization.Localization;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

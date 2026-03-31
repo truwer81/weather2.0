@@ -13,9 +13,9 @@ public interface LocalizationRepository extends JpaRepository<Localization, Long
 
     @Modifying
     @Query("""
-    update Localization e
-    set e.sortOrder = :sortOrder
-    where e.id = :id
-""")
-    void updateOrderBy(@Param("id") Long id, @Param("sortOrder") Long sortOrder);
+        update Localization e
+        set e.sortOrder = :sortOrder
+        where e.id = :id
+    """)
+    void updateSortOrder(@Param("id") Long id, @Param("sortOrder") Long sortOrder);
 }
