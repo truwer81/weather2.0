@@ -18,12 +18,12 @@ public class OpenWeatherController {
     private final OpenWeatherService openWeatherService;
 
     @GetMapping
-    public WeatherDTO getWeather(@RequestParam Long cityId) throws OpenWeatherApiClient.WeatherRetrievalException {
+    public WeatherDTO getWeather(@RequestParam Long cityId) {
         return openWeatherService.getWeatherForLocalization(cityId);
     }
 
     @GetMapping("/forecast")
-    public List<ForecastDTO> getForecasts(@RequestParam Long cityId) throws OpenWeatherApiClient.WeatherRetrievalException {
+    public List<ForecastDTO> getForecasts(@RequestParam Long cityId) {
         return openWeatherService.getForecastsForLocalization(cityId);
     }
 

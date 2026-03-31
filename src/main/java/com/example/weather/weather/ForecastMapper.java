@@ -20,7 +20,7 @@ public final class ForecastMapper {
             return Collections.emptyList();
         }
 
-        Integer timezoneSeconds = response.city() != null ? response.city().timezone() : null;
+        var timezoneSeconds = response.city() != null ? response.city().timezone() : null;
 
         return response.list().stream()
                 .map(item -> toEntity(localization, item, timezoneSeconds))
@@ -32,7 +32,7 @@ public final class ForecastMapper {
             ForecastResponseDTO.ForecastItemDTO item,
             Integer timezoneSeconds
     ) {
-        Forecast forecast = new Forecast();
+        var forecast = new Forecast();
 
         forecast.setLocalization(localization);
         forecast.setForecastTime(toTimestamp(item.dt(), timezoneSeconds));
@@ -58,7 +58,7 @@ public final class ForecastMapper {
             return Timestamp.from(Instant.ofEpochSecond(epochSeconds));
         }
 
-        LocalDateTime localDateTime = LocalDateTime.ofEpochSecond(
+        var localDateTime = LocalDateTime.ofEpochSecond(
                 epochSeconds,
                 0,
                 java.time.ZoneOffset.ofTotalSeconds(timezoneSeconds)
@@ -72,7 +72,7 @@ public final class ForecastMapper {
             return null;
         }
 
-        ForecastResponseDTO.WeatherDTO firstWeather = item.weather().get(0);
+        ForecastResponseDTO.WeatherDTO firstWeather = item.weather().getFirst();
         return firstWeather != null ? firstWeather.description() : null;
     }
 
