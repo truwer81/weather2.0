@@ -10,12 +10,12 @@
 <div class="container">
     <header class="page-header">
         <h1>Weather 2.0</h1>
-        <p class="subtitle">Current weather overview for saved cities</p>
+        <p class="subtitle">Current weather overview and forecast for saved locations</p>
     </header>
 
     <section class="panel">
         <div class="panel-header">
-            <h2>Saved cities</h2>
+            <h2>Saved locations</h2>
             <button id="reload-all-btn" type="button">Reload list</button>
         </div>
 
@@ -100,15 +100,37 @@
 
     <section class="panel">
         <h2>Add location</h2>
+
         <form id="city-form">
-            <div class="grid">
-                <input type="text" id="city" placeholder="Location name or label" required>
-                <input type="text" id="region" placeholder="Region">
-                <input type="text" id="country" placeholder="Country" required>
-                <input type="number" step="any" id="longitude" placeholder="Longitude (e.g. 21.0122)" required>
-                <input type="number" step="any" id="latitude" placeholder="Latitude (e.g. 52.2297)" required>
+            <div class="form-scroll">
+                <div class="grid">
+                <div class="form-field">
+                    <label for="city">Location</label>
+                    <input type="text" id="city" name="city" placeholder="name or label" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="region">Region</label>
+                    <input type="text" id="region" name="region" placeholder="optional">
+                </div>
+
+                <div class="form-field">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" placeholder="required" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" step="any" id="longitude" name="longitude" placeholder="e.g. 21.0122" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" step="any" id="latitude" name="latitude" placeholder="e.g. 52.2297" required>
+                </div>
+                    <button type="submit">Add location</button>
+                </div>
             </div>
-            <button type="submit">Add location</button>
         </form>
     </section>
 </div>

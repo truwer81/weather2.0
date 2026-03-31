@@ -12,7 +12,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 reloadAllBtn.addEventListener("click", async () => {
-    await loadCities();
+    try {
+        await loadCities();
+        showMessage("List reloaded. Fresh weather data retrieved.", false);
+    } catch (error) {
+        showMessage(error.message, true);
+    }
 });
 
 cityForm.addEventListener("submit", async (event) => {
@@ -48,7 +53,13 @@ cityForm.addEventListener("submit", async (event) => {
     }
 });
 
+function clearMessage() {
+    messageBox.textContent = "";
+    messageBox.className = "";
+}
+
 async function loadCities() {
+    clearMessage();
     try {
         const response = await fetch("/api/cities");
 
@@ -119,7 +130,7 @@ function buildRow(city, weather) {
         <td>
             <div class="actions">
                 <button class="action-btn forecast-btn">Forecast</button>
-                <button class="action-btn refresh-btn">Refresh</button>
+                <button class="action-btn edit-btn">Edit location</button>
                 <button class="action-btn delete-btn">Delete</button>
             </div>
         </td>
@@ -129,13 +140,8 @@ function buildRow(city, weather) {
         await toggleForecastRow(tr, city.id);
     });
 
-    tr.querySelector(".refresh-btn").addEventListener("click", async () => {
-        try {
-            await refreshSingleCity(city.id);
-            showMessage(`Weather refreshed for ${city.city}`, false);
-        } catch (error) {
-            showMessage(error.message, true);
-        }
+    tr.querySelector(".edit-btn").addEventListener("click", () => {
+        showMessage("Edit location will be available in a future update.", false);
     });
 
     tr.querySelector(".delete-btn").addEventListener("click", async () => {
