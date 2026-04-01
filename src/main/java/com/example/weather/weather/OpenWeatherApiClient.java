@@ -98,7 +98,7 @@ public class OpenWeatherApiClient {
                 + "&lon=" + localization.getLongitude()
                 + "&appid=" + apiKey
                 + "&units=metric"
-                + "&lang=pl"
+                + "&lang=en"
                 + "&cnt=16";
     }
 

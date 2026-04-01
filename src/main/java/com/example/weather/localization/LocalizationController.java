@@ -3,6 +3,7 @@ package com.example.weather.localization;
 import com.example.weather.localization.dto.CreateLocalizationRequest;
 import com.example.weather.localization.dto.LocalizationDTO;
 import com.example.weather.localization.dto.OrderByDTO;
+import com.example.weather.localization.dto.UpdateLocalizationRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,22 @@ public class LocalizationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCity(@PathVariable Long id) {
         localizationService.deleteLocalization(id);
+    }
+
+    @PutMapping("/{id}")
+    public LocalizationDTO updateCity(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateLocalizationRequest request
+    ) {
+        Localization localization = localizationService.updateLocalization(
+                id,
+                request.city(),
+                request.longitude(),
+                request.latitude(),
+                request.region(),
+                request.country()
+        );
+        return LocalizationDTO.from(localization);
     }
 
     @PutMapping("/order")

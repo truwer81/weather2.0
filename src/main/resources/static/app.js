@@ -1,3 +1,13 @@
+let citiesState = [];
+let authState = {
+    authenticated: false,
+    username: null,
+    roles: []
+};
+
+const editingIdInput = document.getElementById("editing-id");
+const submitBtn = document.getElementById("submit-btn");
+const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const cityForm = document.getElementById("city-form");
 const tableBody = document.getElementById("cities-table-body");
 const messageBox = document.getElementById("message");
@@ -23,20 +33,24 @@ reloadAllBtn.addEventListener("click", async () => {
 cityForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    const editingId = editingIdInput.value;
+
     const payload = {
-        city: document.getElementById("city").value,
-        country: document.getElementById("country").value,
-        region: document.getElementById("region").value,
+        city: document.getElementById("city").value.trim(),
+        country: document.getElementById("country").value.trim(),
+        region: document.getElementById("region").value.trim() || null,
         longitude: parseFloat(document.getElementById("longitude").value),
         latitude: parseFloat(document.getElementById("latitude").value)
     };
 
+    const isEdit = Boolean(editingId);
+    const url = isEdit ? `/api/cities/${editingId}` : "/api/cities";
+    const method = isEdit ? "PUT" : "POST";
+
     try {
-        const response = await fetch("/api/cities", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+        const response = await fetch(url, {
+            method,
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
@@ -45,8 +59,8 @@ cityForm.addEventListener("submit", async (event) => {
             throw new Error(error);
         }
 
-        cityForm.reset();
-        showMessage("City added successfully", false);
+        resetFormMode();
+        showMessage(isEdit ? "City updated successfully" : "City added successfully", false);
         await loadCities();
     } catch (error) {
         showMessage(error.message, true);
@@ -110,51 +124,58 @@ async function loadWeather(cityId) {
 function buildRow(city, weather) {
     const tr = document.createElement("tr");
 
+    const manageButtons = canManageLocations()
+        ? `
+            <div class="order-actions">
+                <button class="order-btn move-up-btn">↑</button>
+                <button class="order-btn move-down-btn">↓</button>
+            </div>
+            <div class="actions">
+                <button class="action-btn refresh-btn">Refresh</button>
+                <button class="action-btn edit-btn">Edit</button>
+                <button class="action-btn delete-btn">Delete</button>
+            </div>
+          `
+        : `
+            <div class="actions">
+                <button class="action-btn refresh-btn">Refresh</button>
+            </div>
+          `;
+
     tr.innerHTML = `
         <td>${city.city ?? ""}</td>
         <td>${city.region ?? ""}</td>
         <td>${city.country ?? ""}</td>
-        <td>${formatNumber(weather?.temperature, 1)}</td>
-        <td>${formatNumber(weather?.feelsLike, 1)}</td>
-        <td>${formatNumber(weather?.humidity, 0)}</td>
-        <td>${formatNumber(weather?.pressure, 0)}</td>
+        <td>${formatValue(weather?.temperature)}</td>
+        <td>${formatValue(weather?.feelsLike)}</td>
+        <td>${formatValue(weather?.humidity)}</td>
+        <td>${formatValue(weather?.pressure)}</td>
         <td>${formatWind(weather?.windSpeed)}</td>
-        <td>${formatNumber(weather?.cloudsAll ?? weather?.cloudsPercentage, 0)}</td>
+        <td>${formatValue(weather?.cloudsPercentage)}</td>
         <td>${weather?.description ?? "-"}</td>
-        <td>
-            <div class="order-actions">
-                <button class="order-btn move-up-btn" title="Move up">↑</button>
-                <button class="order-btn move-down-btn" title="Move down">↓</button>
-            </div>
-        </td>
-        <td>
-            <div class="actions">
-                <button class="action-btn forecast-btn">Forecast</button>
-                <button class="action-btn edit-btn">Edit location</button>
-                <button class="action-btn delete-btn">Delete</button>
-            </div>
-        </td>
+        <td>${canManageLocations() ? manageButtons : "-"}</td>
     `;
 
-    tr.querySelector(".forecast-btn").addEventListener("click", async () => {
-        await toggleForecastRow(tr, city.id);
-    });
-
-    tr.querySelector(".edit-btn").addEventListener("click", () => {
-        showMessage("Edit location will be available in a future update.", false);
-    });
-
-    tr.querySelector(".delete-btn").addEventListener("click", async () => {
+    tr.querySelector(".refresh-btn")?.addEventListener("click", async () => {
         try {
-            const response = await fetch(`/api/cities/${city.id}`, {
-                method: "DELETE"
-            });
+            await refreshSingleCity(city.id);
+            showMessage(`Weather refreshed for ${city.city}`, false);
+        } catch (error) {
+            showMessage(error.message, true);
+        }
+    });
 
+    tr.querySelector(".edit-btn")?.addEventListener("click", () => {
+        startEdit(city);
+    });
+
+    tr.querySelector(".delete-btn")?.addEventListener("click", async () => {
+        try {
+            const response = await fetch(`/api/cities/${city.id}`, { method: "DELETE" });
             if (!response.ok) {
                 const error = await tryReadError(response);
                 throw new Error(error);
             }
-
             showMessage("City deleted successfully", false);
             await loadCities();
         } catch (error) {
@@ -162,11 +183,11 @@ function buildRow(city, weather) {
         }
     });
 
-    tr.querySelector(".move-up-btn").addEventListener("click", async () => {
+    tr.querySelector(".move-up-btn")?.addEventListener("click", async () => {
         await moveCity(city.id, -1);
     });
 
-    tr.querySelector(".move-down-btn").addEventListener("click", async () => {
+    tr.querySelector(".move-down-btn")?.addEventListener("click", async () => {
         await moveCity(city.id, 1);
     });
 
@@ -426,6 +447,59 @@ function getPrecipitationClass(value) {
         return "value-muted";
     }
     return "value-rain";
+}
+
+function startEdit(city) {
+    editingIdInput.value = city.id;
+    document.getElementById("city").value = city.city ?? "";
+    document.getElementById("country").value = city.country ?? "";
+    document.getElementById("region").value = city.region ?? "";
+    document.getElementById("longitude").value = city.longitude ?? "";
+    document.getElementById("latitude").value = city.latitude ?? "";
+
+    submitBtn.textContent = "Save changes";
+    cancelEditBtn.hidden = false;
+
+    cityForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function resetFormMode() {
+    editingIdInput.value = "";
+    cityForm.reset();
+    submitBtn.textContent = "Add city";
+    cancelEditBtn.hidden = true;
+}
+
+cancelEditBtn.addEventListener("click", resetFormMode);
+
+function canManageLocations() {
+    return authState.authenticated && authState.roles.includes("ROLE_ADMIN");
+}
+
+async function loadAuthState() {
+    try {
+        const response = await fetch("/api/auth/me");
+        if (!response.ok) {
+            authState = { authenticated: false, username: null, roles: [] };
+            return;
+        }
+        authState = await response.json();
+    } catch {
+        authState = { authenticated: false, username: null, roles: [] };
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadAuthState();
+    updateUiByAuth();
+    await loadCities();
+});
+
+function updateUiByAuth() {
+    const formPanel = document.getElementById("city-form-panel");
+    if (!formPanel) return;
+
+    formPanel.style.display = canManageLocations() ? "block" : "none";
 }
 
 async function moveCity(cityId, direction) {

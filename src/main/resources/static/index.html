@@ -100,6 +100,7 @@
 
     <section class="panel">
         <h2>Add location</h2>
+        <input type="hidden" id="editing-id" />
 
         <form id="city-form">
             <div class="form-scroll">
@@ -128,7 +129,8 @@
                     <label for="latitude">Latitude</label>
                     <input type="number" step="any" id="latitude" name="latitude" placeholder="e.g. 52.2297" required>
                 </div>
-                    <button type="submit">Add location</button>
+                    <button type="submit" id="submit-btn">Add city</button>
+                    <button type="button" id="cancel-edit-btn" hidden>Cancel edit</button>
                 </div>
             </div>
         </form>
