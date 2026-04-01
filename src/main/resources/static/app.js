@@ -13,11 +13,11 @@ const tableBody = document.getElementById("cities-table-body");
 const messageBox = document.getElementById("message");
 const reloadAllBtn = document.getElementById("reload-all-btn");
 
-let citiesState = [];
-
 console.log("NEW APP.JS LOADED");
 
 document.addEventListener("DOMContentLoaded", async () => {
+    await loadAuthState();
+    updateUiByAuth();
     await loadCities();
 });
 
@@ -124,23 +124,22 @@ async function loadWeather(cityId) {
 function buildRow(city, weather) {
     const tr = document.createElement("tr");
 
-    const manageButtons = canManageLocations()
+    const orderButtons = canManageLocations()
         ? `
             <div class="order-actions">
                 <button class="order-btn move-up-btn">↑</button>
                 <button class="order-btn move-down-btn">↓</button>
             </div>
-            <div class="actions">
-                <button class="action-btn refresh-btn">Refresh</button>
-                <button class="action-btn edit-btn">Edit</button>
-                <button class="action-btn delete-btn">Delete</button>
-            </div>
           `
-        : `
-            <div class="actions">
-                <button class="action-btn refresh-btn">Refresh</button>
-            </div>
-          `;
+        : "-";
+
+    const actionButtons = `
+        <div class="actions">
+            <button class="action-btn refresh-btn">Refresh</button>
+            ${canManageLocations() ? `<button class="action-btn edit-btn">Edit</button>` : ""}
+            ${canManageLocations() ? `<button class="action-btn delete-btn">Delete</button>` : ""}
+        </div>
+    `;
 
     tr.innerHTML = `
         <td>${city.city ?? ""}</td>
@@ -153,7 +152,8 @@ function buildRow(city, weather) {
         <td>${formatWind(weather?.windSpeed)}</td>
         <td>${formatValue(weather?.cloudsPercentage)}</td>
         <td>${weather?.description ?? "-"}</td>
-        <td>${canManageLocations() ? manageButtons : "-"}</td>
+        <td>${orderButtons}</td>
+        <td>${actionButtons}</td>
     `;
 
     tr.querySelector(".refresh-btn")?.addEventListener("click", async () => {
@@ -489,12 +489,6 @@ async function loadAuthState() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-    await loadAuthState();
-    updateUiByAuth();
-    await loadCities();
-});
-
 function updateUiByAuth() {
     const formPanel = document.getElementById("city-form-panel");
     if (!formPanel) return;
@@ -579,6 +573,13 @@ async function tryReadError(response) {
     } catch {
         return `Request failed with status ${response.status}`;
     }
+}
+
+function formatValue(value, digits = 1) {
+    if (value === null || value === undefined) {
+        return "-";
+    }
+    return Number(value).toFixed(digits);
 }
 
 function formatWind(value) {

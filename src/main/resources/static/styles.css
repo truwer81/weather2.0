@@ -293,3 +293,32 @@ th {
     background: #ddd;
     color: #222;
 }
+
+.auth-links {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.auth-links a {
+    color: #8fd3ff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-links a:hover {
+    color: #bfe8ff;
+    text-decoration: underline;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+#cancel-edit-btn {
+    background: #d9d9d9;
+    color: #222;
+}
