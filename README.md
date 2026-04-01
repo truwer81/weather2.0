@@ -131,8 +131,15 @@ In this mode:
 ```shell
 mvn clean package
 ```
+
+#### First time, with postgres:
 ```shell
 docker compose --env-file .env -f docker-compose.prod.yml -p weather-prod up -d --build
+```
+
+#### Without postgres, only app:
+```shell
+docker compose --env-file .env -f docker-compose.prod.yml -p weather-prod up -d --build weather-app
 ```
 
 ### Stop the full stack
