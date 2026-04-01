@@ -53,6 +53,31 @@ public class LocalizationService {
     }
 
     @Transactional
+    public Localization updateLocalization(
+            long localizationId,
+            String city,
+            Double longitude,
+            Double latitude,
+            String region,
+            String country
+    ) {
+        validateCoordinates(longitude, latitude);
+        validateRequiredFields(city, country);
+
+        var localization = localizationRepository.findById(localizationId)
+                .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
+
+        localization.setCity(city.trim());
+        localization.setCountry(country.trim());
+        localization.setRegion(region == null || region.isBlank() ? null : region.trim());
+        localization.setLongitude(longitude);
+        localization.setLatitude(latitude);
+
+        return localizationRepository.save(localization);
+    }
+
+
+    @Transactional
     public List<Localization> saveDisplayOrder(List<OrderByDTO> orders) {
         validateOrders(orders);
 

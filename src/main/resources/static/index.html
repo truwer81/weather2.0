@@ -11,6 +11,14 @@
     <header class="page-header">
         <h1>Weather 2.0</h1>
         <p class="subtitle">Current weather overview and forecast for saved locations</p>
+
+        <div class="auth-links">
+            <a href="/login.html">Login</a>
+
+            <form action="/logout" method="post" class="logout-form">
+                <button type="submit" class="link-button">Logout</button>
+            </form>
+        </div>
     </header>
 
     <section class="panel">
@@ -98,38 +106,44 @@
         </div>
     </section>
 
-    <section class="panel">
-        <h2>Add location</h2>
+    <section class="panel" id="city-form-panel">
+        <h2>Location</h2>
 
         <form id="city-form">
+            <input type="hidden" id="editing-id">
+
             <div class="form-scroll">
                 <div class="grid">
-                <div class="form-field">
-                    <label for="city">Location</label>
-                    <input type="text" id="city" name="city" placeholder="name or label" required>
-                </div>
+                    <div class="form-field">
+                        <label for="city">Name or label</label>
+                        <input type="text" id="city" name="city" placeholder="required" required>
+                    </div>
 
-                <div class="form-field">
-                    <label for="region">Region</label>
-                    <input type="text" id="region" name="region" placeholder="optional">
-                </div>
+                    <div class="form-field">
+                        <label for="region">Region</label>
+                        <input type="text" id="region" name="region" placeholder="optional">
+                    </div>
 
-                <div class="form-field">
-                    <label for="country">Country</label>
-                    <input type="text" id="country" name="country" placeholder="required" required>
-                </div>
+                    <div class="form-field">
+                        <label for="country">Country</label>
+                        <input type="text" id="country" name="country" placeholder="required" required>
+                    </div>
 
-                <div class="form-field">
-                    <label for="longitude">Longitude</label>
-                    <input type="number" step="any" id="longitude" name="longitude" placeholder="e.g. 21.0122" required>
-                </div>
+                    <div class="form-field">
+                        <label for="longitude">Longitude</label>
+                        <input type="number" step="any" id="longitude" name="longitude" placeholder="e.g. 21.0122" required>
+                    </div>
 
-                <div class="form-field">
-                    <label for="latitude">Latitude</label>
-                    <input type="number" step="any" id="latitude" name="latitude" placeholder="e.g. 52.2297" required>
+                    <div class="form-field">
+                        <label for="latitude">Latitude</label>
+                        <input type="number" step="any" id="latitude" name="latitude" placeholder="e.g. 52.2297" required>
+                    </div>
                 </div>
-                    <button type="submit">Add location</button>
-                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" id="submit-btn" class="primary-btn">Add location</button>
+                <button type="button" id="cancel-edit-btn" hidden>Cancel edit</button>
             </div>
         </form>
     </section>
