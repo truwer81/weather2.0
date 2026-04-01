@@ -80,6 +80,43 @@ table {
     background: white;
 }
 
+.table-wrapper table tbody td {
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 10px 12px;
+}
+
+.table-wrapper table thead th {
+    padding: 14px 12px;
+}
+
+.table-wrapper table {
+    table-layout: auto;
+    width: 100%;
+}
+
+.table-wrapper td {
+    vertical-align: middle;
+}
+
+.table-wrapper td:nth-child(1),
+.table-wrapper td:nth-child(2),
+.table-wrapper td:nth-child(3),
+.table-wrapper td:nth-child(10) {
+    white-space: nowrap;
+}
+
+.order-actions,
+.actions {
+    gap: 6px;
+}
+
+.order-btn,
+.action-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
 th, td {
     border: 1px solid #ddd;
     padding: 10px;
@@ -206,16 +243,14 @@ th {
 
 .forecast-table {
     width: 100%;
-    border-collapse: collapse;
-    background: white;
+    table-layout: fixed;
 }
 
 .forecast-table th,
 .forecast-table td {
-    border: 1px solid #ddd;
+    font-size: 14px;
     padding: 8px 10px;
-    text-align: left;
-    white-space: nowrap;
+    line-height: 1.25;
 }
 
 .forecast-day-even td,
@@ -241,15 +276,42 @@ th {
 }
 
 .forecast-day-label {
-    margin-top: 4px;
+    margin-top: 3px;
     color: #555;
     font-size: 13px;
 }
 
 .forecast-day-date {
-    margin-top: 4px;
+    margin-top: 3px;
     color: #777;
     font-size: 12px;
+}
+
+.forecast-table th:nth-child(1),
+.forecast-table td:nth-child(1) {
+    width: 9%;
+}
+
+.forecast-table th:nth-child(2),
+.forecast-table td:nth-child(2),
+.forecast-table th:nth-child(3),
+.forecast-table td:nth-child(3),
+.forecast-table th:nth-child(4),
+.forecast-table td:nth-child(4),
+.forecast-table th:nth-child(5),
+.forecast-table td:nth-child(5),
+.forecast-table th:nth-child(6),
+.forecast-table td:nth-child(6),
+.forecast-table th:nth-child(7),
+.forecast-table td:nth-child(7),
+.forecast-table th:nth-child(8),
+.forecast-table td:nth-child(8) {
+    width: 8%;
+}
+
+.forecast-table th:nth-child(9),
+.forecast-table td:nth-child(9) {
+    width: 35%;
 }
 
 .value-cold {
@@ -296,19 +358,31 @@ th {
 
 .auth-links {
     display: flex;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
     margin-top: 8px;
 }
 
-.auth-links a {
-    color: #8fd3ff;
-    text-decoration: none;
+.auth-links a,
+.link-button {
+    color: #9ed8ff;
     font-weight: 600;
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
 }
 
-.auth-links a:hover {
-    color: #bfe8ff;
+.auth-links a:hover,
+.link-button:hover {
+    color: #d3efff;
     text-decoration: underline;
+}
+
+.logout-form {
+    margin: 0;
 }
 
 .form-actions {
@@ -319,6 +393,81 @@ th {
 }
 
 #cancel-edit-btn {
-    background: #d9d9d9;
+    background: #d8d8d8;
     color: #222;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+form button[type="submit"],
+.login-submit-btn {
+    border: 1px solid #8e97a3;
+    background: #eceef2;
+    color: #111;
+    padding: 14px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 48px;
+}
+
+form button[type="submit"]:hover,
+.login-submit-btn:hover {
+    background: #e2e6ec;
+}
+
+form button[type="submit"]:disabled,
+.login-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.auth-links a,
+.auth-links .link-button {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #9ed8ff;
+    font: inherit;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.auth-links a:hover,
+.auth-links .link-button:hover {
+    color: #d3efff;
+    text-decoration: underline;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.auth-links a:focus,
+.auth-links .link-button:focus {
+    outline: none;
+    color: #d3efff;
+    text-decoration: underline;
+}
+
+.logout-form {
+    margin: 0;
+    padding: 0;
 }

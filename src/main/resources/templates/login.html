@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Weather 2.0</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <h1>Please sign in</h1>
+        <p class="subtitle">Log in to manage locations in Weather 2.0</p>
+    </header>
+
+    <section class="panel login-panel">
+        <div th:if="${param.error}" class="message-error login-message">
+            Invalid username or password
+        </div>
+
+        <div th:if="${param.logout}" class="message-success login-message">
+            You have been logged out
+        </div>
+
+        <form th:action="@{/login}" method="post" class="login-form">
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="primary-btn login-submit-btn">Sign in</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<footer class="footer">
+    <div>Created by Jakub Heppner</div>
+    <div>jakub.heppner@gmail.com</div>
+    <div>Version 2.0</div>
+</footer>
+</body>
+</html>

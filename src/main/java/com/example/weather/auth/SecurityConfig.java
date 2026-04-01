@@ -22,7 +22,14 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/index.html", "/styles.css", "/app.js").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login",
+                                "/styles.css",
+                                "/login.css",
+                                "/app.js"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/weather/**").permitAll()
@@ -31,8 +38,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/cities/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults())
-                .logout(logout -> logout.logoutSuccessUrl("/"));
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .permitAll()
+                );
 
         return http.build();
     }
