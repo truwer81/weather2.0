@@ -132,7 +132,7 @@ In this mode:
 mvn clean package
 ```
 
-#### First time:
+#### First time, with postgres:
 ```shell
 docker compose --env-file .env -f docker-compose.prod.yml -p weather-prod up -d --build
 ```
