@@ -7,6 +7,7 @@ body {
     max-width: 520px;
     margin: 0 auto 32px auto;
     padding: 28px 32px;
+    visibility: hidden;
 }
 
 .login-form {

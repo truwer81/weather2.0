@@ -6,6 +6,8 @@ const reloadAllBtn = document.getElementById("reload-all-btn");
 const editingIdInput = document.getElementById("editing-id");
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
+const loginLink = document.getElementById("login-link");
+const logoutForm = document.getElementById("logout-form");
 
 let citiesState = [];
 let authState = {
@@ -104,14 +106,6 @@ async function loadAuthState() {
 
 function canManageLocations() {
     return authState.authenticated && authState.roles.includes("ROLE_ADMIN");
-}
-
-function updateUiByAuth() {
-    const formPanel = document.getElementById("city-form-panel");
-
-    if (formPanel) {
-        formPanel.style.display = canManageLocations() ? "block" : "none";
-    }
 }
 
 async function loadCities() {
@@ -512,6 +506,22 @@ function getPrecipitationClass(value) {
         return "value-muted";
     }
     return "value-rain";
+}
+
+function updateUiByAuth() {
+    const formPanel = document.getElementById("city-form-panel");
+
+    if (formPanel) {
+        formPanel.style.display = canManageLocations() ? "block" : "none";
+    }
+
+    if (loginLink) {
+        loginLink.style.display = authState.authenticated ? "none" : "inline";
+    }
+
+    if (logoutForm) {
+        logoutForm.style.display = authState.authenticated ? "inline-block" : "none";
+    }
 }
 
 async function moveCity(cityId, direction) {

@@ -14,7 +14,7 @@
         <p class="subtitle">Log in to manage locations in Weather 2.0</p>
     </header>
 
-    <section class="panel login-panel">
+    <section class="panel login-panel" id="login-panel">
         <div th:if="${param.error}" class="message-error login-message">
             Invalid username or password
         </div>
@@ -46,5 +46,33 @@
     <div>jakub.heppner@gmail.com</div>
     <div>Version 2.0</div>
 </footer>
+<script>
+    async function initLoginPage() {
+        const loginPanel = document.getElementById("login-panel");
+
+        try {
+            const response = await fetch("/api/auth/me", {
+                credentials: "same-origin"
+            });
+
+            if (response.ok) {
+                const auth = await response.json();
+
+                if (auth.authenticated) {
+                    window.location.replace("/");
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error("Could not verify auth state on login page:", error);
+        }
+
+        if (loginPanel) {
+            loginPanel.style.visibility = "visible";
+        }
+    }
+
+    initLoginPage();
+</script>
 </body>
 </html>
