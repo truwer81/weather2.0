@@ -80,19 +80,20 @@ table {
     background: white;
 }
 
-.table-wrapper table tbody td {
-    font-size: 14px;
-    line-height: 1.25;
-    padding: 10px 12px;
+.table-wrapper table {
+    table-layout: fixed;
+    width: 100%;
 }
 
 .table-wrapper table thead th {
-    padding: 14px 12px;
+    padding: 10px 8px;
+    font-size: 13px;
 }
 
-.table-wrapper table {
-    table-layout: auto;
-    width: 100%;
+.table-wrapper table tbody td {
+    font-size: 13px;
+    line-height: 1.2;
+    padding: 9px 10px;
 }
 
 .table-wrapper td {
@@ -100,20 +101,13 @@ table {
 }
 
 .table-wrapper td:nth-child(1),
-.table-wrapper td:nth-child(2),
-.table-wrapper td:nth-child(3),
-.table-wrapper td:nth-child(10) {
+.table-wrapper td:nth-child(8) {
     white-space: nowrap;
-}
-
-.order-actions,
-.actions {
-    gap: 6px;
 }
 
 .order-btn,
 .action-btn {
-    padding: 6px 10px;
+    padding: 6px 8px;
     font-size: 13px;
 }
 
@@ -143,10 +137,18 @@ th .th-unit {
     line-height: 1.1;
 }
 
-.actions,
+.actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
 .order-actions {
     display: flex;
-    gap: 6px;
+    align-items: center;
+    gap: 4px;
+    margin-right: 6px;
 }
 
 .order-btn,
@@ -198,6 +200,11 @@ th .th-unit {
     white-space: nowrap;
 }
 
+td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 th {
     vertical-align: top;
 }
@@ -226,10 +233,10 @@ th {
 
 .th-unit {
     display: block;
-    margin-top: 6px;
-    font-size: 12px;
-    color: #666;
-    line-height: 1;
+    font-size: 11px;
+    color: #777;
+    margin-top: 3px;
+    line-height: 1.1;
 }
 
 .forecast-details-row td {
@@ -238,11 +245,15 @@ th {
 }
 
 .forecast-wrapper {
+    width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .forecast-table {
-    width: 100%;
+    width: max-content;
+    min-width: 760px;
     table-layout: fixed;
 }
 
@@ -363,24 +374,6 @@ th {
     margin-top: 8px;
 }
 
-.auth-links a,
-.link-button {
-    color: #9ed8ff;
-    font-weight: 600;
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font: inherit;
-}
-
-.auth-links a:hover,
-.link-button:hover {
-    color: #d3efff;
-    text-decoration: underline;
-}
-
 .logout-form {
     margin: 0;
 }
@@ -470,4 +463,278 @@ form button[type="submit"]:disabled,
 .logout-form {
     margin: 0;
     padding: 0;
+}
+
+/* ===== MAIN TABLE - WEB LAYOUT ===== */
+
+.table-wrapper > table th.col-location,
+.table-wrapper > table td.col-location-cell {
+    width: 18%;
+}
+
+.table-wrapper > table th.col-num,
+.table-wrapper > table td.col-num-cell {
+    width: 5%;
+}
+
+.table-wrapper > table th.col-desc,
+.table-wrapper > table td.col-desc-cell {
+    width: 18%;
+}
+
+.table-wrapper > table th.col-actions,
+.table-wrapper > table td.col-actions-cell {
+    width: 22%;
+}
+
+.location-main {
+    font-weight: 600;
+    color: #1f1f1f;
+}
+
+.location-meta {
+    color: #666;
+    font-weight: 400;
+}
+
+.col-num-cell {
+    text-align: left;
+}
+
+.col-desc-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.col-actions-cell {
+    white-space: nowrap;
+}
+
+.actions .forecast-btn,
+.actions .edit-btn,
+.actions .delete-btn {
+    min-width: 70px;
+}
+
+.order-btn {
+    min-width: 30px;
+    padding: 6px 7px;
+    font-weight: 700;
+}
+
+.col-location-cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 12px;
+    }
+
+    .container {
+        padding: 0 8px;
+    }
+
+    .panel {
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .panel-header h2 {
+        margin: 0;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-scroll .grid {
+        min-width: 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* ===== MAIN TABLE -> CARDS ===== */
+
+    .table-wrapper {
+        overflow-x: hidden;
+    }
+
+    .locations-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: auto;
+    }
+
+    .locations-table > thead {
+        display: none;
+    }
+
+    .locations-table > tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .locations-table > tbody > tr.location-row {
+        display: block;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .locations-table > tbody > tr.location-row > td {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+        padding: 10px 12px;
+        border: none;
+        border-bottom: 1px solid #eee;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+        box-sizing: border-box;
+    }
+
+    .locations-table > tbody > tr.location-row > td:last-child {
+        border-bottom: none;
+    }
+
+    .locations-table > tbody > tr.location-row > td::before {
+        content: attr(data-label);
+        display: block;
+        width: 110px;
+        min-width: 110px;
+        font-weight: 700;
+        color: #555;
+        line-height: 1.3;
+        flex-shrink: 0;
+    }
+
+    .cell-value {
+        display: block;
+        min-width: 0;
+        flex: 1 1 auto;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .location-value {
+        text-align: left;
+    }
+
+    .desc-value {
+        text-align: left;
+    }
+
+    .actions-value {
+        display: block;
+    }
+
+    .locations-table .col-location-cell,
+    .locations-table .col-desc-cell,
+    .locations-table .col-actions-cell {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+    }
+
+    .locations-table .col-location-cell .location-main,
+    .locations-table .col-location-cell .location-meta {
+        display: inline;
+    }
+
+    .locations-table .col-actions-cell .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+    }
+
+    .locations-table .col-actions-cell .order-actions {
+        display: flex;
+        gap: 6px;
+        margin-right: 2px;
+    }
+
+    .locations-table .col-actions-cell .action-btn,
+    .locations-table .col-actions-cell .order-btn {
+        min-height: 40px;
+    }
+
+    /* ===== FORECAST ROW UNDER CARD ===== */
+
+    .locations-table > tbody > tr.forecast-details-row {
+        display: block;
+        width: 100%;
+        margin: -4px 0 12px 0;
+    }
+
+    .locations-table > tbody > tr.forecast-details-row > td {
+        display: block;
+        width: 100%;
+        padding: 0;
+        border: none;
+        background: transparent;
+        box-sizing: border-box;
+    }
+
+    .forecast-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        background: #f9fbff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+    }
+
+    .forecast-table {
+        width: max-content;
+        min-width: 760px;
+        table-layout: fixed;
+        border-collapse: collapse;
+        background: white;
+    }
+
+    .forecast-table th,
+    .forecast-table td {
+        font-size: 13px;
+        padding: 8px 10px;
+        white-space: nowrap;
+    }
+
+    .forecast-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f0f0f0;
+    }
+
+    .forecast-day-cell {
+        min-width: 120px;
+    }
 }
