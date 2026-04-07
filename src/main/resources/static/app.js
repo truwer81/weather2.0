@@ -60,8 +60,9 @@ cityForm.addEventListener("submit", async (event) => {
         });
 
         if (!response.ok) {
-            const error = await tryReadError(response);
-            throw new Error(error);
+            const errorMessage = await tryReadError(response);
+            showMessage(errorMessage, true);
+            return;
         }
 
         resetFormMode();
@@ -115,8 +116,9 @@ async function loadCities() {
         const response = await fetch("/api/cities");
 
         if (!response.ok) {
-            const error = await tryReadError(response);
-            throw new Error(error);
+            const errorMessage = await tryReadError(response);
+            showMessage(errorMessage, true);
+            return;
         }
 
         const cities = await response.json();
@@ -160,37 +162,40 @@ async function loadWeather(cityId) {
 
 function buildRow(city, weather) {
     const tr = document.createElement("tr");
-
-    const orderCell = canManageLocations()
-        ? `
-            <div class="order-actions">
-                <button class="order-btn move-up-btn" title="Move up">↑</button>
-                <button class="order-btn move-down-btn" title="Move down">↓</button>
-            </div>
-          `
-        : "-";
-
-    const actionButtons = `
-        <div class="actions">
-            <button class="action-btn forecast-btn">Forecast</button>
-            ${canManageLocations() ? `<button class="action-btn edit-btn">Edit location</button>` : ""}
-            ${canManageLocations() ? `<button class="action-btn delete-btn">Delete</button>` : ""}
-        </div>
-    `;
+    tr.className = "location-row";
 
     tr.innerHTML = `
-        <td>${city.city ?? ""}</td>
-        <td>${city.region ?? ""}</td>
-        <td>${city.country ?? ""}</td>
-        <td>${formatNumber(weather?.temperature, 1)}</td>
-        <td>${formatNumber(weather?.feelsLike, 1)}</td>
-        <td>${formatNumber(weather?.humidity, 0)}</td>
-        <td>${formatNumber(weather?.pressure, 0)}</td>
-        <td>${formatWind(weather?.windSpeed)}</td>
-        <td>${formatNumber(weather?.cloudsAll ?? weather?.cloudsPercentage, 0)}</td>
-        <td>${weather?.description ?? "-"}</td>
-        <td>${orderCell}</td>
-        <td>${actionButtons}</td>
+        <td class="col-location-cell" data-label="Location">
+            <div class="cell-value location-value">
+                ${buildLocationLabel(city)}
+            </div>
+        </td>
+        <td class="col-num-cell" data-label="Temp.">
+            <span class="cell-value">${formatNumber(weather?.temperature, 1)}</span>
+        </td>
+        <td class="col-num-cell" data-label="Feels like">
+            <span class="cell-value">${formatNumber(weather?.feelsLike, 1)}</span>
+        </td>
+        <td class="col-num-cell" data-label="Humidity">
+            <span class="cell-value">${formatNumber(weather?.humidity, 0)}</span>
+        </td>
+        <td class="col-num-cell" data-label="Pressure">
+            <span class="cell-value">${formatNumber(weather?.pressure, 0)}</span>
+        </td>
+        <td class="col-num-cell" data-label="Wind speed">
+            <span class="cell-value">${formatWind(weather?.windSpeed)}</span>
+        </td>
+        <td class="col-num-cell" data-label="Clouds">
+            <span class="cell-value">${formatNumber(weather?.cloudsAll ?? weather?.cloudsPercentage, 0)}</span>
+        </td>
+        <td class="col-desc-cell" data-label="Desc.">
+            <span class="cell-value desc-value">${weather?.description ?? "-"}</span>
+        </td>
+        <td class="col-actions-cell" data-label="Actions">
+            <div class="cell-value actions-value">
+                ${buildActionsHtml()}
+            </div>
+        </td>
     `;
 
     tr.querySelector(".forecast-btn")?.addEventListener("click", async () => {
@@ -208,8 +213,9 @@ function buildRow(city, weather) {
             });
 
             if (!response.ok) {
-                const error = await tryReadError(response);
-                throw new Error(error);
+                const errorMessage = await tryReadError(response);
+                showMessage(errorMessage, true);
+                return;
             }
 
             showMessage("City deleted successfully", false);
@@ -265,7 +271,7 @@ async function toggleForecastRow(cityRow, cityId) {
     const detailsRow = document.createElement("tr");
     detailsRow.className = "forecast-details-row";
     detailsRow.innerHTML = `
-        <td colspan="12">
+        <td colspan="9">
             <div class="forecast-loading">Loading forecast...</div>
         </td>
     `;
@@ -275,13 +281,13 @@ async function toggleForecastRow(cityRow, cityId) {
     try {
         const forecast = await loadForecast(cityId);
         detailsRow.innerHTML = `
-            <td colspan="12">
+            <td colspan="9">
                 ${buildForecastTable(forecast)}
             </td>
         `;
     } catch (error) {
         detailsRow.innerHTML = `
-            <td colspan="12">
+            <td colspan="9">
                 <div class="message-error">Could not load forecast: ${error.message}</div>
             </td>
         `;
@@ -477,6 +483,24 @@ function formatNumber(value, digits = 1) {
     return Number(value).toFixed(digits);
 }
 
+function buildLocationLabel(city) {
+    const cityName = city.city ?? "";
+    const region = city.region?.trim();
+    const country = city.country ?? "";
+
+    if (region) {
+        return `
+            <span class="location-main">${cityName}</span>
+            <span class="location-meta"> (${region}, ${country})</span>
+        `;
+    }
+
+    return `
+        <span class="location-main">${cityName}</span>
+        <span class="location-meta"> (${country})</span>
+    `;
+}
+
 function formatPercentValue(value) {
     if (value === null || value === undefined) return "-";
     return Math.round(Number(value) * 100);
@@ -552,6 +576,29 @@ async function moveCity(cityId, direction) {
         showMessage(error.message, true);
         await loadCities();
     }
+}
+
+function buildActionsHtml() {
+    if (!canManageLocations()) {
+        return `
+            <div class="actions">
+                <button type="button" class="action-btn forecast-btn">Forecast</button>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="actions">
+            <div class="order-actions">
+                <button type="button" class="order-btn move-up-btn" title="Move up">↑</button>
+                <button type="button" class="order-btn move-down-btn" title="Move down">↓</button>
+            </div>
+
+            <button type="button" class="action-btn forecast-btn">Forecast</button>
+            <button type="button" class="action-btn edit-btn">Edit</button>
+            <button type="button" class="action-btn delete-btn">Delete</button>
+        </div>
+    `;
 }
 
 async function persistSortOrder() {
