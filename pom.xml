@@ -14,8 +14,8 @@
 
     <groupId>com.example</groupId>
     <artifactId>weather2.1</artifactId>
-    <version>2.1</version>
-    <name>weather2.1</name>
+    <version>2.2</version>
+    <name>Weather2.2</name>
     <description>Weather application migrated to Spring Boot</description>
 
     <properties>
