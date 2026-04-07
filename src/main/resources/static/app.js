@@ -2,7 +2,7 @@ const cityForm = document.getElementById("city-form");
 const tableBody = document.getElementById("cities-table-body");
 const messageBox = document.getElementById("message");
 const reloadAllBtn = document.getElementById("reload-all-btn");
-
+const searchContainer = document.getElementById("location-search-container");
 const editingIdInput = document.getElementById("editing-id");
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
@@ -10,6 +10,8 @@ const loginLink = document.getElementById("login-link");
 const logoutForm = document.getElementById("logout-form");
 
 let citiesState = [];
+let locationSearchRequestSeq = 0;
+
 let authState = {
     authenticated: false,
     username: null,
@@ -21,15 +23,19 @@ console.log("APP.JS LOADED");
 document.addEventListener("DOMContentLoaded", async () => {
     await loadAuthState();
     updateUiByAuth();
+    renderLocationSearch();   // 🔥 DODAJ
     await loadCities();
 });
 
 reloadAllBtn.addEventListener("click", async () => {
     try {
+        setFormBusy(true);
         await loadCities();
         showMessage("List reloaded. Fresh weather data retrieved.", false);
     } catch (error) {
         showMessage(error.message, true);
+    } finally {
+        setFormBusy(false);
     }
 });
 
@@ -51,6 +57,8 @@ cityForm.addEventListener("submit", async (event) => {
     const method = isEdit ? "PUT" : "POST";
 
     try {
+        setFormBusy(true);
+
         const response = await fetch(url, {
             method,
             headers: {
@@ -70,6 +78,8 @@ cityForm.addEventListener("submit", async (event) => {
         await loadCities();
     } catch (error) {
         showMessage(error.message, true);
+    } finally {
+        setFormBusy(false);
     }
 });
 
@@ -207,6 +217,14 @@ function buildRow(city, weather) {
     });
 
     tr.querySelector(".delete-btn")?.addEventListener("click", async () => {
+        const confirmed = window.confirm(
+            `Delete location "${city.city ?? "this location"}"? This action cannot be undone.`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
         try {
             const response = await fetch(`/api/cities/${city.id}`, {
                 method: "DELETE"
@@ -236,7 +254,220 @@ function buildRow(city, weather) {
     return tr;
 }
 
+function debounce(fn, delay = 300) {
+    let timeoutId;
+
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+}
+
+const debouncedLocationSearch = debounce(() => {
+    performLocationSearch();
+}, 300);
+
+function initLocationSearchEvents() {
+    const input = document.getElementById("location-search-input");
+    const button = document.getElementById("location-search-btn");
+    const cancelBtn = document.getElementById("location-search-cancel-btn");
+
+    if (!input || !button || !cancelBtn) return;
+
+    button.addEventListener("click", async () => {
+        await performLocationSearch();
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        resetLocationSearch(true);
+        input.blur();
+    });
+
+    input.addEventListener("keydown", async (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            await performLocationSearch();
+        }
+
+        if (event.key === "Escape") {
+            resetLocationSearch(true);
+            input.blur();
+        }
+    });
+
+    input.addEventListener("input", () => {
+        if (!input.value.trim()) {
+            resetLocationSearch(false);
+            return;
+        }
+
+        debouncedLocationSearch();
+    });
+}
+
+function renderLocationSearch() {
+    if (!canManageLocations()) {
+        return;
+    }
+
+    searchContainer.innerHTML = `
+        <div class="location-search-panel">
+            <div class="location-search-header">
+                <p class="location-search-hint">
+                    Search for a location and pick one to fill the form automatically.
+                    You can edit the details before saving or enter your own data manually.
+                </p>
+            </div>
+
+                <div class="location-search-box">
+                 <input
+                     type="text"
+                     id="location-search-input"
+                      placeholder="e.g. Wroclaw, Gdańsk.."
+                  >
+                   <button type="button" id="location-search-btn">Search</button>
+                  <button type="button" id="location-search-cancel-btn" class="search-cancel-btn" hidden>Cancel</button>
+</div>
+
+<div id="location-search-results" class="location-search-results" hidden></div>
+        </div>
+    `;
+    setTimeout(initLocationSearchEvents, 0);
+}
+
+function renderSearchResults(results) {
+    const container = document.getElementById("location-search-results");
+
+    if (!container) return;
+
+    container.hidden = false;
+
+    if (!results || results.length === 0) {
+        container.innerHTML = `<div class="location-search-empty">No results</div>`;
+        return;
+    }
+
+    container.innerHTML = results.map(r => `
+        <div class="location-result-item"
+             data-city="${r.city}"
+             data-region="${r.region ?? ""}"
+             data-country="${r.country}"
+             data-lat="${r.latitude}"
+             data-lon="${r.longitude}">
+             
+            <div class="location-result-label">${r.label}</div>
+            <div class="location-result-coords">
+                lat: ${r.latitude.toFixed(4)}, lon: ${r.longitude.toFixed(4)}
+            </div>
+        </div>
+    `).join("");
+
+    attachResultClickHandlers();
+}
+
+function attachResultClickHandlers() {
+    const results = document.querySelectorAll(".location-result-item");
+
+    results.forEach(el => {
+        el.addEventListener("click", () => {
+            results.forEach(item => item.classList.remove("selected"));
+            el.classList.add("selected");
+
+            editingIdInput.value = "";
+            document.getElementById("city").value = el.dataset.city;
+            document.getElementById("region").value = el.dataset.region;
+            document.getElementById("country").value = el.dataset.country;
+            document.getElementById("latitude").value = el.dataset.lat;
+            document.getElementById("longitude").value = el.dataset.lon;
+
+            submitBtn.textContent = "Add location";
+            cancelEditBtn.hidden = false;
+
+            showMessage("Location filled from search", false);
+
+            const resultsContainer = document.getElementById("location-search-results");
+            if (resultsContainer) {
+                resultsContainer.hidden = true;
+            }
+
+            document.getElementById("city-form").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+    });
+}
+
+function resetLocationSearch(clearInput = true) {
+    const input = document.getElementById("location-search-input");
+    const resultsContainer = document.getElementById("location-search-results");
+    const cancelBtn = document.getElementById("location-search-cancel-btn");
+
+    if (input && clearInput) {
+        input.value = "";
+    }
+
+    if (resultsContainer) {
+        resultsContainer.hidden = true;
+        resultsContainer.innerHTML = "";
+    }
+
+    if (cancelBtn) {
+        cancelBtn.hidden = true;
+    }
+}
+
+async function performLocationSearch() {
+    const input = document.getElementById("location-search-input");
+    if (!input) return;
+
+    const query = input.value.trim();
+    const cancelBtn = document.getElementById("location-search-cancel-btn");
+
+    if (!query) {
+        resetLocationSearch(false);
+        return;
+    }
+
+    const requestId = ++locationSearchRequestSeq;
+
+    try {
+        setSearchBusy(true);
+
+        const response = await fetch(`/api/locations/search?q=${encodeURIComponent(query)}`);
+
+        if (!response.ok) {
+            const error = await tryReadError(response);
+            throw new Error(error);
+        }
+
+        const results = await response.json();
+
+        if (requestId !== locationSearchRequestSeq) {
+            return;
+        }
+
+        if (input.value.trim() !== query) {
+            return;
+        }
+
+        renderSearchResults(results);
+
+        if (cancelBtn) {
+            cancelBtn.hidden = false;
+        }
+    } catch (error) {
+        showMessage(error.message, true);
+    } finally {
+        if (requestId === locationSearchRequestSeq) {
+            setSearchBusy(false);
+        }
+    }
+}
+
 function startEdit(city) {
+    resetLocationSearch(true);
+
     editingIdInput.value = city.id;
     document.getElementById("city").value = city.city ?? "";
     document.getElementById("country").value = city.country ?? "";
@@ -443,7 +674,7 @@ function getDateKey(date) {
 }
 
 function formatDayName(date) {
-    return date.toLocaleDateString("pl-PL", { weekday: "long" });
+    return date.toLocaleDateString("pl-PL", {weekday: "long"});
 }
 
 function formatShortDate(date) {
@@ -530,6 +761,33 @@ function getPrecipitationClass(value) {
         return "value-muted";
     }
     return "value-rain";
+}
+
+function setFormBusy(isBusy) {
+    if (submitBtn) {
+        submitBtn.disabled = isBusy;
+    }
+
+    if (cancelEditBtn) {
+        cancelEditBtn.disabled = isBusy;
+    }
+
+    if (reloadAllBtn) {
+        reloadAllBtn.disabled = isBusy;
+    }
+}
+
+function setSearchBusy(isBusy) {
+    const locationSearchBtn = document.getElementById("location-search-btn");
+    const locationSearchCancelBtn = document.getElementById("location-search-cancel-btn");
+
+    if (locationSearchBtn) {
+        locationSearchBtn.disabled = isBusy;
+    }
+
+    if (locationSearchCancelBtn) {
+        locationSearchCancelBtn.disabled = isBusy;
+    }
 }
 
 function updateUiByAuth() {

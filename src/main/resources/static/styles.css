@@ -573,7 +573,6 @@ form button[type="submit"]:disabled,
     }
 
     /* ===== MAIN TABLE -> CARDS ===== */
-
     .table-wrapper {
         overflow-x: hidden;
     }
@@ -686,7 +685,6 @@ form button[type="submit"]:disabled,
     }
 
     /* ===== FORECAST ROW UNDER CARD ===== */
-
     .locations-table > tbody > tr.forecast-details-row {
         display: block;
         width: 100%;
@@ -738,3 +736,103 @@ form button[type="submit"]:disabled,
         min-width: 120px;
     }
 }
+
+.location-search-panel {
+    margin-bottom: 16px;
+}
+
+
+.location-result-item {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: #fff;
+}
+
+.location-result-item:hover {
+    background: #f0f4f8;
+}
+
+.location-result-label {
+    font-weight: 600;
+}
+
+.location-result-coords {
+    font-size: 12px;
+    color: #666;
+}
+
+.location-search-results {
+    margin-top: 14px;
+    display: grid;
+    gap: 8px;
+}
+
+.location-search-result-item.selected {
+    border-color: #9ed8ff;
+    background: #eef7ff;
+}
+
+/* ===== MOBILE FIX - LOCATION SEARCH ===== */
+
+@media (max-width: 600px) {
+    .location-search-box {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .location-search-box input,
+    .location-search-box button {
+        width: 92%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .location-search-box button {
+        min-height: 48px;
+    }
+}
+
+.form-actions #cancel-edit-btn {
+    background: #ececec;
+    color: #333;
+    border: 1px solid #cfcfcf;
+    box-shadow: none;
+    font-weight: 500;
+}
+
+.form-actions #cancel-edit-btn:hover {
+    background: #e3e3e3;
+}
+
+button:disabled,
+input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.location-search-box .secondary-btn {
+    min-width: 88px;
+}
+
+.search-cancel-btn {
+    background: #f3f3f3;
+    color: #555;
+    border: 1px solid #d7d7d7;
+    box-shadow: none;
+    font-weight: 500;
+    min-width: 88px;
+}
+
+.search-cancel-btn:hover {
+    background: #ebebeb;
+    color: #333;
+}
+
+.search-cancel-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+

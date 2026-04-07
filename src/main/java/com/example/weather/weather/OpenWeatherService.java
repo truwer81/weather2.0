@@ -1,6 +1,7 @@
 package com.example.weather.weather;
 
 import com.example.weather.common.ExternalServiceException;
+import com.example.weather.common.OpenWeatherClientException;
 import com.example.weather.localization.Localization;
 import com.example.weather.localization.LocalizationService;
 import com.example.weather.weather.dto.ForecastDTO;
@@ -69,7 +70,7 @@ public class OpenWeatherService {
             var savedWeather = weatherRepository.save(weather);
 
             return WeatherMapper.toDTO(savedWeather);
-        } catch (OpenWeatherApiClient.WeatherRetrievalException e) {
+        } catch (OpenWeatherClientException e) {
             throw new ExternalServiceException("Could not fetch weather from OpenWeather", e);
         }
     }
@@ -85,7 +86,7 @@ public class OpenWeatherService {
             var savedForecasts = forecastRepository.saveAll(forecasts);
 
             return ForecastMapper.toDTOList(savedForecasts);
-        } catch (OpenWeatherApiClient.WeatherRetrievalException e) {
+        } catch (OpenWeatherClientException e) {
             throw new ExternalServiceException("Could not fetch forecast from OpenWeather", e);
         }
     }
