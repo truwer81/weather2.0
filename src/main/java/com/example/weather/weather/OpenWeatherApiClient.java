@@ -1,5 +1,6 @@
 package com.example.weather.weather;
 
+import com.example.weather.common.OpenWeatherClientException;
 import com.example.weather.localization.Localization;
 import com.example.weather.weather.dto.ForecastResponseDTO;
 import com.example.weather.weather.dto.WeatherResponseDTO;
@@ -38,7 +39,7 @@ public class OpenWeatherApiClient {
         this.apiKey = apiKey;
     }
 
-    public WeatherResponseDTO getCurrentWeather(Localization localization) throws WeatherRetrievalException {
+    public WeatherResponseDTO getCurrentWeather(Localization localization) throws OpenWeatherClientException {
         try {
             String url = buildUrl(localization, baseUrl);
 
@@ -50,7 +51,7 @@ public class OpenWeatherApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new WeatherRetrievalException(
+                throw new OpenWeatherClientException(
                         "Weather API returned status " + response.statusCode() + ": " + response.body()
                 );
             }
@@ -58,14 +59,14 @@ public class OpenWeatherApiClient {
             return objectMapper.readValue(response.body(), WeatherResponseDTO.class);
 
         } catch (IOException e) {
-            throw new WeatherRetrievalException("Failed to read weather API response", e);
+            throw new OpenWeatherClientException("Failed to read weather API response", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new WeatherRetrievalException("Weather API call interrupted", e);
+            throw new OpenWeatherClientException("Weather API call interrupted", e);
         }
     }
 
-    public ForecastResponseDTO getForecast(Localization localization) throws WeatherRetrievalException {
+    public ForecastResponseDTO getForecast(Localization localization) throws OpenWeatherClientException {
         try {
             String url = buildForecastUrl(localization, proUrl);
 
@@ -77,7 +78,7 @@ public class OpenWeatherApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                throw new WeatherRetrievalException(
+                throw new OpenWeatherClientException(
                         "Forecast API returned status " + response.statusCode() + ": " + response.body()
                 );
             }
@@ -85,10 +86,10 @@ public class OpenWeatherApiClient {
             return objectMapper.readValue(response.body(), ForecastResponseDTO.class);
 
         } catch (IOException e) {
-            throw new WeatherRetrievalException("Failed to read forecast API response", e);
+            throw new OpenWeatherClientException("Failed to read forecast API response", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new WeatherRetrievalException("Forecast API call interrupted", e);
+            throw new OpenWeatherClientException("Forecast API call interrupted", e);
         }
     }
 
@@ -110,13 +111,5 @@ public class OpenWeatherApiClient {
                 + "&units=metric";
     }
 
-    public static class WeatherRetrievalException extends Exception {
-        public WeatherRetrievalException(String message) {
-            super(message);
-        }
 
-        public WeatherRetrievalException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
 }

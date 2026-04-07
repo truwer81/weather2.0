@@ -28,7 +28,11 @@ public class SecurityConfig {
                                 "/login",
                                 "/styles.css",
                                 "/login.css",
-                                "/app.js"
+                                "/app.js",
+                                "/api/auth/me",
+                                "/api/cities/**",
+                                "/api/weather/**",
+                                "/api/locations/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
