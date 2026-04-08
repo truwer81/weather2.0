@@ -51,7 +51,7 @@
             feelsLikeShort: "Feels like",
             humidity: "Humidity",
             pressure: "Pressure",
-            windSpeed: "Wind speed",
+            windSpeed: "Wind sp.",
             clouds: "Clouds",
             descriptionShort: "Desc.",
             description: "Description",
