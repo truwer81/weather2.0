@@ -1,7 +1,11 @@
+/* ------------------------------ Page theme ------------------------------ */
+
 body {
     background: #1f2229;
     color: #f3f6fb;
 }
+
+/* ------------------------------ Login panel ----------------------------- */
 
 .login-panel {
     max-width: 520px;
@@ -9,6 +13,12 @@ body {
     padding: 28px 32px;
     visibility: hidden;
 }
+
+.login-message {
+    margin-bottom: 16px;
+}
+
+/* ------------------------------ Login form ------------------------------ */
 
 .login-form {
     display: flex;
@@ -24,8 +34,8 @@ body {
 
 .login-form label {
     color: #111;
-    font-weight: 600;
     font-size: 16px;
+    font-weight: 600;
 }
 
 .login-form input {
@@ -33,7 +43,7 @@ body {
     box-sizing: border-box;
     padding: 14px 16px;
     border: 1px solid #bfc6d1;
-    border-radius: 4px;
+    border-radius: 6px;
     background: #f8f9fb;
     color: #111;
     font-size: 18px;
@@ -48,12 +58,9 @@ body {
 
 .login-submit-btn {
     min-width: 220px;
-    padding: 14px 22px;
 }
 
-.login-message {
-    margin-bottom: 16px;
-}
+/* ----------------------------- Header tweaks ---------------------------- */
 
 .page-header h1 {
     color: #ffffff;
@@ -62,6 +69,8 @@ body {
 .page-header .subtitle {
     color: #d0d7e2;
 }
+
+/* ------------------------------- Responsive ----------------------------- */
 
 @media (max-width: 640px) {
     .login-panel {
@@ -76,27 +85,4 @@ body {
     .login-submit-btn {
         width: 100%;
     }
-}
-
-.primary-btn {
-    border: 1px solid #8e97a3;
-    background: #eceef2;
-    color: #111;
-    padding: 14px 22px;
-    border-radius: 4px;
-    cursor: pointer;
-    font: inherit;
-    font-weight: 600;
-    min-height: 48px;
-    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.primary-btn:hover {
-    background: #e6f2ff;
-    border-color: #8fd3ff;
-}
-
-.primary-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(143, 211, 255, 0.25);
 }
