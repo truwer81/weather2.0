@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Weather 2.2</title>
+
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/login.css">
 </head>
@@ -14,6 +15,7 @@
         <p class="subtitle">Log in to manage locations in Weather 2.2</p>
     </header>
 
+    <!-- Login panel is revealed only after auth check completes. -->
     <section class="panel login-panel" id="login-panel">
         <div th:if="${param.error}" class="message-error login-message">
             Invalid username or password
@@ -26,12 +28,25 @@
         <form th:action="@{/login}" method="post" class="login-form">
             <div class="form-field">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" autocomplete="username" required autofocus>
+                <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        autocomplete="username"
+                        required
+                        autofocus
+                >
             </div>
 
             <div class="form-field">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" autocomplete="current-password" required>
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="current-password"
+                        required
+                >
             </div>
 
             <div class="form-actions">
@@ -46,6 +61,7 @@
     <div>jakub.heppner@gmail.com</div>
     <div>Version 2.2</div>
 </footer>
+
 <script>
     async function initLoginPage() {
         const loginPanel = document.getElementById("login-panel");

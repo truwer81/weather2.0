@@ -12,6 +12,7 @@
         <h1>Weather 2.2</h1>
         <p class="subtitle">Current weather overview and forecast for saved locations</p>
 
+        <!-- Authentication actions -->
         <div class="auth-links">
             <a href="/login.html" id="login-link">Login</a>
 
@@ -21,12 +22,14 @@
         </div>
     </header>
 
+    <!-- Saved locations overview -->
     <section class="panel">
         <div class="panel-header">
             <h2>Saved locations</h2>
             <button id="reload-all-btn" type="button">Reload list</button>
         </div>
 
+        <!-- Runtime messages rendered by JavaScript -->
         <div id="message"></div>
 
         <div class="table-wrapper">
@@ -38,47 +41,55 @@
                             <span class="th-title">Location</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Temp.</span>
                             <span class="th-unit">°C</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Feels<br>like</span>
                             <span class="th-unit">°C</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Humidity</span>
                             <span class="th-unit">%</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Pressure</span>
                             <span class="th-unit">hPa</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Wind<br>speed</span>
                             <span class="th-unit">km/h</span>
                         </div>
                     </th>
+
                     <th class="col-num">
                         <div class="th-stack">
                             <span class="th-title">Clouds</span>
                             <span class="th-unit">%</span>
                         </div>
                     </th>
+
                     <th class="col-desc">
                         <div class="th-stack">
                             <span class="th-title">Desc.</span>
                         </div>
                     </th>
+
                     <th class="col-actions">
                         <div class="th-stack">
                             <span class="th-title">Actions</span>
@@ -86,14 +97,17 @@
                     </th>
                 </tr>
                 </thead>
+
                 <tbody id="cities-table-body"></tbody>
             </table>
         </div>
     </section>
 
+    <!-- Location create/edit form -->
     <section class="panel" id="city-form-panel">
-
         <h2>Manage locations</h2>
+
+        <!-- Search UI is injected by JavaScript -->
         <div id="location-search-container"></div>
 
         <form id="city-form">
@@ -103,34 +117,67 @@
                 <div class="grid">
                     <div class="form-field">
                         <label for="city">Name or label</label>
-                        <input type="text" id="city" name="city" placeholder="required" required>
+                        <input
+                                type="text"
+                                id="city"
+                                name="city"
+                                placeholder="required"
+                                required
+                        >
                     </div>
 
                     <div class="form-field">
                         <label for="region">Region</label>
-                        <input type="text" id="region" name="region" placeholder="optional">
+                        <input
+                                type="text"
+                                id="region"
+                                name="region"
+                                placeholder="optional"
+                        >
                     </div>
 
                     <div class="form-field">
                         <label for="country">Country</label>
-                        <input type="text" id="country" name="country" placeholder="required" required>
+                        <input
+                                type="text"
+                                id="country"
+                                name="country"
+                                placeholder="required"
+                                required
+                        >
                     </div>
 
                     <div class="form-field">
                         <label for="longitude">Longitude</label>
-                        <input type="number" step="any" id="longitude" name="longitude" placeholder="e.g. 21.0122" required>
+                        <input
+                                type="number"
+                                id="longitude"
+                                name="longitude"
+                                step="any"
+                                placeholder="e.g. 21.0122"
+                                required
+                        >
                     </div>
 
                     <div class="form-field">
                         <label for="latitude">Latitude</label>
-                        <input type="number" step="any" id="latitude" name="latitude" placeholder="e.g. 52.2297" required>
+                        <input
+                                type="number"
+                                id="latitude"
+                                name="latitude"
+                                step="any"
+                                placeholder="e.g. 52.2297"
+                                required
+                        >
                     </div>
                 </div>
             </div>
 
             <div class="form-actions">
                 <button type="submit" id="submit-btn" class="primary-btn">Add location</button>
-                <button type="button" id="cancel-edit-btn" class="secondary-btn" hidden>Cancel edit</button>
+                <button type="button" id="cancel-edit-btn" class="secondary-btn" hidden>
+                    Cancel
+                </button>
             </div>
         </form>
     </section>
@@ -139,7 +186,7 @@
 <footer class="footer">
     <div>Created by Jakub Heppner</div>
     <div>jakub.heppner@gmail.com</div>
-    <div>Version 2.1</div>
+    <div>Version 2.2</div>
 </footer>
 
 <script src="/app.js"></script>
