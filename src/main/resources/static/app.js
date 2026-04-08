@@ -18,8 +18,6 @@ let authState = {
     roles: []
 };
 
-console.log("APP.JS LOADED");
-
 /* ----------------------------- App bootstrap ----------------------------- */
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -337,7 +335,7 @@ function buildActionsHtml() {
     if (!canManageLocations()) {
         return `
             <div class="actions">
-                <button type="button" class="action-btn forecast-btn">Forecast</button>
+                <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">Forecast</button>
             </div>
         `;
     }
@@ -345,13 +343,13 @@ function buildActionsHtml() {
     return `
         <div class="actions">
             <div class="order-actions">
-                <button type="button" class="order-btn move-up-btn" title="Move up">↑</button>
-                <button type="button" class="order-btn move-down-btn" title="Move down">↓</button>
+                <button type="button" class="btn btn-secondary btn-icon order-btn move-up-btn" title="Move up">↑</button>
+                <button type="button" class="btn btn-secondary btn-icon order-btn move-down-btn" title="Move down">↓</button>
             </div>
 
-            <button type="button" class="action-btn forecast-btn">Forecast</button>
-            <button type="button" class="action-btn edit-btn">Edit</button>
-            <button type="button" class="action-btn delete-btn">Delete</button>
+            <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">Forecast</button>
+            <button type="button" class="btn btn-warning btn-md btn-action action-btn edit-btn">Edit</button>
+            <button type="button" class="btn btn-danger btn-md btn-action action-btn delete-btn">Delete</button>
         </div>
     `;
 }
@@ -420,15 +418,18 @@ function renderLocationSearch() {
                     id="location-search-input"
                     placeholder="e.g. Wroclaw, Gdańsk.."
                 >
-                <button type="button" id="location-search-btn">Search</button>
-                <button
-                    type="button"
-                    id="location-search-cancel-btn"
-                    class="search-cancel-btn"
-                    hidden
-                >
-                    Cancel
-                </button>
+
+                <div class="location-search-actions">
+                    <button type="button" id="location-search-btn" class="btn btn-primary btn-md">Search</button>
+                    <button
+                        type="button"
+                        id="location-search-cancel-btn"
+                        class="btn btn-secondary btn-md"
+                        hidden
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
 
             <div id="location-search-results" class="location-search-results" hidden></div>
