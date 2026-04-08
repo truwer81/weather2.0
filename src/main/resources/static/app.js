@@ -46,13 +46,7 @@ cityForm.addEventListener("submit", async (event) => {
 
     const editingId = editingIdInput.value;
 
-    const payload = {
-        city: document.getElementById("city").value.trim(),
-        country: document.getElementById("country").value.trim(),
-        region: document.getElementById("region").value.trim() || null,
-        longitude: parseFloat(document.getElementById("longitude").value),
-        latitude: parseFloat(document.getElementById("latitude").value)
-    };
+    const payload = getCityFormValues();
 
     const isEdit = Boolean(editingId);
     const url = isEdit ? `/api/cities/${editingId}` : "/api/cities";
@@ -273,6 +267,16 @@ function buildRow(city, weather) {
     return tr;
 }
 
+function getCityFormValues() {
+    return {
+        city: document.getElementById("city").value.trim(),
+        country: document.getElementById("country").value.trim(),
+        region: document.getElementById("region").value.trim() || null,
+        longitude: parseFloat(document.getElementById("longitude").value),
+        latitude: parseFloat(document.getElementById("latitude").value)
+    };
+}
+
 function startEdit(city) {
     resetLocationSearch(true);
 
@@ -436,8 +440,7 @@ function renderLocationSearch() {
         </div>
     `;
 
-    // Delay binding until injected markup is present in the DOM.
-    setTimeout(initLocationSearchEvents, 0);
+    initLocationSearchEvents();
 }
 
 function initLocationSearchEvents() {
