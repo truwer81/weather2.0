@@ -125,7 +125,7 @@
     }
 
     function formatTemplate(template, params = {}) {
-        return String(template).replace(/\{(\w+)\}/g, function (_, key) {
+        return String(template).replace(/\{(\w+)}/g, function (_, key) {
             return params[key] !== undefined && params[key] !== null
                 ? String(params[key])
                 : "{" + key + "}";
