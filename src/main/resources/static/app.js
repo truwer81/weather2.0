@@ -1,5 +1,5 @@
-const cityForm = document.getElementById("city-form");
-const tableBody = document.getElementById("cities-table-body");
+const locationForm = document.getElementById("city-form");
+const locationsTableBody = document.getElementById("cities-table-body");
 const messageBox = document.getElementById("message");
 const reloadAllBtn = document.getElementById("reload-all-btn");
 const searchContainer = document.getElementById("location-search-container");
@@ -9,7 +9,7 @@ const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const loginLink = document.getElementById("login-link");
 const logoutForm = document.getElementById("logout-form");
 
-let citiesState = [];
+let locationsState = [];
 let locationSearchRequestSeq = 0;
 
 let authState = {
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAuthState();
     updateUiByAuth();
     renderLocationSearch();
-    await loadCities();
+    await loadLocations();
 });
 
 /* ------------------------------ UI events ------------------------------- */
@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 reloadAllBtn.addEventListener("click", async () => {
     try {
         setFormBusy(true);
-        await loadCities();
-        showMessage("List reloaded. Fresh weather data retrieved.", false);
+        await loadLocations();
+        showMessage(t("messages.weatherDataRefreshed"), false);
     } catch (error) {
         showMessage(error.message, true);
     } finally {
@@ -41,12 +41,11 @@ reloadAllBtn.addEventListener("click", async () => {
     }
 });
 
-cityForm.addEventListener("submit", async (event) => {
+locationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const editingId = editingIdInput.value;
-
-    const payload = getCityFormValues();
+    const payload = serializeLocationFormValues();
 
     const isEdit = Boolean(editingId);
     const url = isEdit ? `/api/cities/${editingId}` : "/api/cities";
@@ -70,8 +69,11 @@ cityForm.addEventListener("submit", async (event) => {
         }
 
         resetFormMode();
-        showMessage(isEdit ? "Location updated successfully" : "Location added successfully", false);
-        await loadCities();
+        showMessage(
+            isEdit ? t("messages.locationUpdated") : t("messages.locationAdded"),
+            false
+        );
+        await loadLocations();
     } catch (error) {
         showMessage(error.message, true);
     } finally {
@@ -128,9 +130,9 @@ function updateUiByAuth() {
     }
 }
 
-/* -------------------------- Cities data loading ------------------------- */
+/* -------------------------- Locations data loading ---------------------- */
 
-async function loadCities() {
+async function loadLocations() {
     clearMessage();
 
     try {
@@ -142,34 +144,37 @@ async function loadCities() {
             return;
         }
 
-        const cities = await response.json();
+        const rawLocations = await response.json();
 
-        citiesState = cities
-            .map((city, index) => ({
-                ...city,
-                sortOrder: city.sortOrder ?? index + 1
-            }))
+        locationsState = rawLocations
+            .map((rawLocation, index) => {
+                const location = normalizeLocation(rawLocation);
+                return {
+                    ...location,
+                    sortOrder: location.sortOrder ?? index + 1
+                };
+            })
             .sort((a, b) => a.sortOrder - b.sortOrder);
 
-        await renderCities();
+        await renderLocations();
     } catch (error) {
         showMessage(error.message, true);
     }
 }
 
-async function renderCities() {
-    tableBody.innerHTML = "";
+async function renderLocations() {
+    locationsTableBody.innerHTML = "";
 
-    for (const city of citiesState) {
-        const weather = await loadWeather(city.id);
-        const row = buildRow(city, weather);
-        tableBody.appendChild(row);
+    for (const location of locationsState) {
+        const weather = await loadWeather(location.id);
+        const row = buildLocationRow(location, weather);
+        locationsTableBody.appendChild(row);
     }
 }
 
-async function loadWeather(cityId) {
+async function loadWeather(locationId) {
     try {
-        const response = await fetch(`/api/weather?cityId=${cityId}`);
+        const response = await fetch(`/api/weather?cityId=${locationId}`);
 
         if (!response.ok) {
             return null;
@@ -181,40 +186,40 @@ async function loadWeather(cityId) {
     }
 }
 
-/* ----------------------------- City actions ----------------------------- */
+/* --------------------------- Location actions --------------------------- */
 
-function buildRow(city, weather) {
+function buildLocationRow(location, weather) {
     const tr = document.createElement("tr");
     tr.className = "location-row";
 
     tr.innerHTML = `
-        <td class="col-location-cell" data-label="Location">
+        <td class="col-location-cell" data-label="${escapeHtml(t("labels.location"))}">
             <div class="cell-value location-value">
-                ${buildLocationLabel(city)}
+                ${buildLocationLabel(location)}
             </div>
         </td>
-        <td class="col-num-cell" data-label="Temp.">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.temperatureShort"))}">
             <span class="cell-value">${formatNumber(weather?.temperature, 1)}</span>
         </td>
-        <td class="col-num-cell" data-label="Feels like">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.feelsLikeShort"))}">
             <span class="cell-value">${formatNumber(weather?.feelsLike, 1)}</span>
         </td>
-        <td class="col-num-cell" data-label="Humidity">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.humidity"))}">
             <span class="cell-value">${formatNumber(weather?.humidity, 0)}</span>
         </td>
-        <td class="col-num-cell" data-label="Pressure">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.pressure"))}">
             <span class="cell-value">${formatNumber(weather?.pressure, 0)}</span>
         </td>
-        <td class="col-num-cell" data-label="Wind speed">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.windSpeed"))}">
             <span class="cell-value">${formatWind(weather?.windSpeed)}</span>
         </td>
-        <td class="col-num-cell" data-label="Clouds">
+        <td class="col-num-cell" data-label="${escapeHtml(t("labels.clouds"))}">
             <span class="cell-value">${formatNumber(weather?.cloudsAll ?? weather?.cloudsPercentage, 0)}</span>
         </td>
-        <td class="col-desc-cell" data-label="Desc.">
-            <span class="cell-value desc-value">${weather?.description ?? "-"}</span>
+        <td class="col-desc-cell" data-label="${escapeHtml(t("labels.descriptionShort"))}">
+            <span class="cell-value desc-value">${escapeHtml(weather?.description ?? "-")}</span>
         </td>
-        <td class="col-actions-cell" data-label="Actions">
+        <td class="col-actions-cell" data-label="${escapeHtml(t("labels.actions"))}">
             <div class="cell-value actions-value">
                 ${buildActionsHtml()}
             </div>
@@ -222,16 +227,18 @@ function buildRow(city, weather) {
     `;
 
     tr.querySelector(".forecast-btn")?.addEventListener("click", async () => {
-        await toggleForecastRow(tr, city.id);
+        await toggleForecastRow(tr, location.id);
     });
 
     tr.querySelector(".edit-btn")?.addEventListener("click", () => {
-        startEdit(city);
+        startEdit(location);
     });
 
     tr.querySelector(".delete-btn")?.addEventListener("click", async () => {
         const confirmed = window.confirm(
-            `Delete location "${city.city ?? "this location"}"? This action cannot be undone.`
+            t("confirmations.deleteLocation", {
+                name: location.name || t("labels.location").toLowerCase()
+            })
         );
 
         if (!confirmed) {
@@ -239,7 +246,7 @@ function buildRow(city, weather) {
         }
 
         try {
-            const response = await fetch(`/api/cities/${city.id}`, {
+            const response = await fetch(`/api/cities/${location.id}`, {
                 method: "DELETE"
             });
 
@@ -249,25 +256,25 @@ function buildRow(city, weather) {
                 return;
             }
 
-            showMessage("City deleted successfully", false);
-            await loadCities();
+            showMessage(t("messages.locationDeleted"), false);
+            await loadLocations();
         } catch (error) {
             showMessage(error.message, true);
         }
     });
 
     tr.querySelector(".move-up-btn")?.addEventListener("click", async () => {
-        await moveCity(city.id, -1);
+        await moveLocation(location.id, -1);
     });
 
     tr.querySelector(".move-down-btn")?.addEventListener("click", async () => {
-        await moveCity(city.id, 1);
+        await moveLocation(location.id, 1);
     });
 
     return tr;
 }
 
-function getCityFormValues() {
+function serializeLocationFormValues() {
     return {
         city: document.getElementById("city").value.trim(),
         country: document.getElementById("country").value.trim(),
@@ -277,20 +284,20 @@ function getCityFormValues() {
     };
 }
 
-function startEdit(city) {
+function startEdit(location) {
     resetLocationSearch(true);
 
-    editingIdInput.value = city.id;
-    document.getElementById("city").value = city.city ?? "";
-    document.getElementById("country").value = city.country ?? "";
-    document.getElementById("region").value = city.region ?? "";
-    document.getElementById("longitude").value = city.longitude ?? "";
-    document.getElementById("latitude").value = city.latitude ?? "";
+    editingIdInput.value = location.id;
+    document.getElementById("city").value = location.name ?? "";
+    document.getElementById("country").value = location.country ?? "";
+    document.getElementById("region").value = location.region ?? "";
+    document.getElementById("longitude").value = location.longitude ?? "";
+    document.getElementById("latitude").value = location.latitude ?? "";
 
-    submitBtn.textContent = "Save changes";
+    submitBtn.textContent = t("buttons.saveChanges");
     cancelEditBtn.hidden = false;
 
-    cityForm.scrollIntoView({
+    locationForm.scrollIntoView({
         behavior: "smooth",
         block: "start"
     });
@@ -298,13 +305,13 @@ function startEdit(city) {
 
 function resetFormMode() {
     editingIdInput.value = "";
-    cityForm.reset();
-    submitBtn.textContent = "Add location";
+    locationForm.reset();
+    submitBtn.textContent = t("buttons.addLocation");
     cancelEditBtn.hidden = true;
 }
 
-async function moveCity(cityId, direction) {
-    const currentIndex = citiesState.findIndex((city) => city.id === cityId);
+async function moveLocation(locationId, direction) {
+    const currentIndex = locationsState.findIndex((location) => location.id === locationId);
 
     if (currentIndex === -1) {
         return;
@@ -312,34 +319,39 @@ async function moveCity(cityId, direction) {
 
     const targetIndex = currentIndex + direction;
 
-    if (targetIndex < 0 || targetIndex >= citiesState.length) {
+    if (targetIndex < 0 || targetIndex >= locationsState.length) {
         return;
     }
 
-    [citiesState[currentIndex], citiesState[targetIndex]] =
-        [citiesState[targetIndex], citiesState[currentIndex]];
+    [locationsState[currentIndex], locationsState[targetIndex]] =
+        [locationsState[targetIndex], locationsState[currentIndex]];
 
-    citiesState = citiesState.map((city, index) => ({
-        ...city,
+    locationsState = locationsState.map((location, index) => ({
+        ...location,
         sortOrder: index + 1
     }));
 
-    await renderCities();
+    await renderLocations();
 
     try {
         await persistSortOrder();
-        showMessage("Display order updated", false);
+        showMessage(t("messages.displayOrderUpdated"), false);
     } catch (error) {
         showMessage(error.message, true);
-        await loadCities();
+        await loadLocations();
     }
 }
 
 function buildActionsHtml() {
+    const moveUpTitle = escapeHtml(t("buttons.moveUp"));
+    const moveDownTitle = escapeHtml(t("buttons.moveDown"));
+
     if (!canManageLocations()) {
         return `
             <div class="actions">
-                <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">Forecast</button>
+                <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">
+                    ${escapeHtml(t("buttons.forecast"))}
+                </button>
             </div>
         `;
     }
@@ -347,20 +359,38 @@ function buildActionsHtml() {
     return `
         <div class="actions">
             <div class="order-actions">
-                <button type="button" class="btn btn-secondary btn-icon order-btn move-up-btn" title="Move up">↑</button>
-                <button type="button" class="btn btn-secondary btn-icon order-btn move-down-btn" title="Move down">↓</button>
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-icon order-btn move-up-btn"
+                    title="${moveUpTitle}"
+                >
+                    ↑
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-icon order-btn move-down-btn"
+                    title="${moveDownTitle}"
+                >
+                    ↓
+                </button>
             </div>
 
-            <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">Forecast</button>
-            <button type="button" class="btn btn-warning btn-md btn-action action-btn edit-btn">Edit</button>
-            <button type="button" class="btn btn-danger btn-md btn-action action-btn delete-btn">Delete</button>
+            <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">
+                ${escapeHtml(t("buttons.forecast"))}
+            </button>
+            <button type="button" class="btn btn-warning btn-md btn-action action-btn edit-btn">
+                ${escapeHtml(t("buttons.edit"))}
+            </button>
+            <button type="button" class="btn btn-danger btn-md btn-action action-btn delete-btn">
+                ${escapeHtml(t("buttons.delete"))}
+            </button>
         </div>
     `;
 }
 
 async function persistSortOrder() {
-    const payload = citiesState.map((city, index) => ({
-        localizationId: city.id,
+    const payload = locationsState.map((location, index) => ({
+        localizationId: location.id,
         sortOrder: index + 1
     }));
 
@@ -377,13 +407,16 @@ async function persistSortOrder() {
         throw new Error(error);
     }
 
-    const updatedCities = await response.json();
+    const updatedRawLocations = await response.json();
 
-    citiesState = updatedCities
-        .map((city, index) => ({
-            ...city,
-            sortOrder: city.sortOrder ?? index + 1
-        }))
+    locationsState = updatedRawLocations
+        .map((rawLocation, index) => {
+            const location = normalizeLocation(rawLocation);
+            return {
+                ...location,
+                sortOrder: location.sortOrder ?? index + 1
+            };
+        })
         .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
@@ -410,28 +443,27 @@ function renderLocationSearch() {
     searchContainer.innerHTML = `
         <div class="location-search-panel">
             <div class="location-search-header">
-                <p class="location-search-hint">
-                    Search for a location and pick one to fill the form automatically.
-                    You can edit the details before saving or enter your own data manually.
-                </p>
+                <p class="location-search-hint">${escapeHtml(t("hints.locationSearch"))}</p>
             </div>
 
             <div class="location-search-box">
                 <input
                     type="text"
                     id="location-search-input"
-                    placeholder="e.g. Wroclaw, Gdańsk.."
+                    placeholder="${escapeHtml(t("placeholders.locationSearch"))}"
                 >
 
                 <div class="location-search-actions">
-                    <button type="button" id="location-search-btn" class="btn btn-primary btn-md">Search</button>
+                    <button type="button" id="location-search-btn" class="btn btn-primary btn-md">
+                        ${escapeHtml(t("buttons.search"))}
+                    </button>
                     <button
                         type="button"
                         id="location-search-cancel-btn"
                         class="btn btn-secondary btn-md"
                         hidden
                     >
-                        Cancel
+                        ${escapeHtml(t("buttons.cancel"))}
                     </button>
                 </div>
             </div>
@@ -510,7 +542,8 @@ async function performLocationSearch() {
             throw new Error(error);
         }
 
-        const results = await response.json();
+        const rawResults = await response.json();
+        const results = rawResults.map(normalizeLocationSearchResult);
 
         if (requestId !== locationSearchRequestSeq) {
             return;
@@ -544,7 +577,7 @@ function renderSearchResults(results) {
     container.hidden = false;
 
     if (!results || results.length === 0) {
-        container.innerHTML = `<div class="location-search-empty">No results</div>`;
+        container.innerHTML = `<div class="location-search-empty">${escapeHtml(t("errors.noSearchResults"))}</div>`;
         return;
     }
 
@@ -552,13 +585,13 @@ function renderSearchResults(results) {
         .map((result) => `
             <div
                 class="location-result-item"
-                data-city="${result.city}"
-                data-region="${result.region ?? ""}"
-                data-country="${result.country}"
-                data-lat="${result.latitude}"
-                data-lon="${result.longitude}"
+                data-name="${escapeHtml(result.name)}"
+                data-region="${escapeHtml(result.region ?? "")}"
+                data-country="${escapeHtml(result.country)}"
+                data-lat="${escapeHtml(String(result.latitude))}"
+                data-lon="${escapeHtml(String(result.longitude))}"
             >
-                <div class="location-result-label">${result.label}</div>
+                <div class="location-result-label">${escapeHtml(result.label)}</div>
                 <div class="location-result-coords">
                     lat: ${result.latitude.toFixed(4)}, lon: ${result.longitude.toFixed(4)}
                 </div>
@@ -578,23 +611,23 @@ function attachResultClickHandlers() {
             element.classList.add("selected");
 
             editingIdInput.value = "";
-            document.getElementById("city").value = element.dataset.city;
+            document.getElementById("city").value = element.dataset.name;
             document.getElementById("region").value = element.dataset.region;
             document.getElementById("country").value = element.dataset.country;
             document.getElementById("latitude").value = element.dataset.lat;
             document.getElementById("longitude").value = element.dataset.lon;
 
-            submitBtn.textContent = "Add location";
+            submitBtn.textContent = t("buttons.addLocation");
             cancelEditBtn.hidden = false;
 
-            showMessage("Location filled from search", false);
+            showMessage(t("messages.formFilledFromSearch"), false);
 
             const resultsContainer = document.getElementById("location-search-results");
             if (resultsContainer) {
                 resultsContainer.hidden = true;
             }
 
-            document.getElementById("city-form").scrollIntoView({
+            locationForm.scrollIntoView({
                 behavior: "smooth",
                 block: "start"
             });
@@ -623,8 +656,8 @@ function resetLocationSearch(clearInput = true) {
 
 /* ----------------------------- Forecast UI ------------------------------ */
 
-async function toggleForecastRow(cityRow, cityId) {
-    const nextRow = cityRow.nextElementSibling;
+async function toggleForecastRow(locationRow, locationId) {
+    const nextRow = locationRow.nextElementSibling;
 
     if (nextRow && nextRow.classList.contains("forecast-details-row")) {
         nextRow.remove();
@@ -635,14 +668,14 @@ async function toggleForecastRow(cityRow, cityId) {
     detailsRow.className = "forecast-details-row";
     detailsRow.innerHTML = `
         <td colspan="9">
-            <div class="forecast-loading">Loading forecast...</div>
+            <div class="forecast-loading">${escapeHtml(t("weather.loadingForecast"))}</div>
         </td>
     `;
 
-    cityRow.insertAdjacentElement("afterend", detailsRow);
+    locationRow.insertAdjacentElement("afterend", detailsRow);
 
     try {
-        const forecast = await loadForecast(cityId);
+        const forecast = await loadForecast(locationId);
         detailsRow.innerHTML = `
             <td colspan="9">
                 ${buildForecastTable(forecast)}
@@ -651,14 +684,14 @@ async function toggleForecastRow(cityRow, cityId) {
     } catch (error) {
         detailsRow.innerHTML = `
             <td colspan="9">
-                <div class="message-error">Could not load forecast: ${error.message}</div>
+                <div class="message-error">${escapeHtml(t("errors.forecastLoadFailed"))}</div>
             </td>
         `;
     }
 }
 
-async function loadForecast(cityId) {
-    const response = await fetch(`/api/weather/forecast?cityId=${cityId}`);
+async function loadForecast(locationId) {
+    const response = await fetch(`/api/weather/forecast?cityId=${locationId}`);
 
     if (!response.ok) {
         const error = await tryReadError(response);
@@ -670,7 +703,7 @@ async function loadForecast(cityId) {
 
 function buildForecastTable(items) {
     if (!items || items.length === 0) {
-        return `<div class="forecast-empty">No forecast data</div>`;
+        return `<div class="forecast-empty">${escapeHtml(t("errors.noForecastData"))}</div>`;
     }
 
     const grouped = groupForecastByDay(items);
@@ -686,9 +719,9 @@ function buildForecastTable(items) {
                     const dayCell = index === 0
                         ? `
                             <td class="forecast-day-cell ${dayClass}" rowspan="${group.items.length}">
-                                <div class="forecast-day-name">${group.dayName}</div>
-                                <div class="forecast-day-label">${group.relativeLabel}</div>
-                                <div class="forecast-day-date">(${group.shortDate})</div>
+                                <div class="forecast-day-name">${escapeHtml(group.dayName)}</div>
+                                <div class="forecast-day-label">${escapeHtml(group.relativeLabel)}</div>
+                                <div class="forecast-day-date">(${escapeHtml(group.shortDate)})</div>
                             </td>
                         `
                         : "";
@@ -703,7 +736,7 @@ function buildForecastTable(items) {
                             <td class="${getRainClass(item.rainVolume)}">${formatNumber(item.rainVolume, 1)}</td>
                             <td class="${getSnowClass(item.snowVolume)}">${formatNumber(item.snowVolume, 1)}</td>
                             <td class="${getPrecipitationClass(item.precipitationProbability)}">${formatPercentValue(item.precipitationProbability)}</td>
-                            <td>${item.description ?? "-"}</td>
+                            <td>${escapeHtml(item.description ?? "-")}</td>
                         </tr>
                     `;
                 })
@@ -718,53 +751,53 @@ function buildForecastTable(items) {
                     <tr>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Day</span>
+                                <span class="th-title">${escapeHtml(t("labels.day"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Hour</span>
+                                <span class="th-title">${escapeHtml(t("labels.hour"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Temp.</span>
-                                <span class="th-unit">°C</span>
+                                <span class="th-title">${escapeHtml(t("labels.temperatureShort"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.temperature"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Feels<br>like</span>
-                                <span class="th-unit">°C</span>
+                                <span class="th-title">${escapeHtml(t("labels.feelsLikeShort"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.temperature"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Wind</span>
-                                <span class="th-unit">km/h</span>
+                                <span class="th-title">${escapeHtml(t("labels.wind"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.windSpeed"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Rain</span>
-                                <span class="th-unit">mm</span>
+                                <span class="th-title">${escapeHtml(t("labels.rain"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.rain"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Snow</span>
-                                <span class="th-unit">mm</span>
+                                <span class="th-title">${escapeHtml(t("labels.snow"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.snow"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Precip.<br>chance</span>
-                                <span class="th-unit">%</span>
+                                <span class="th-title">${escapeHtml(t("labels.precipitationChance"))}</span>
+                                <span class="th-unit">${escapeHtml(t("units.precipitationChance"))}</span>
                             </div>
                         </th>
                         <th>
                             <div class="th-stack">
-                                <span class="th-title">Description</span>
+                                <span class="th-title">${escapeHtml(t("labels.description"))}</span>
                             </div>
                         </th>
                     </tr>
@@ -803,6 +836,31 @@ function groupForecastByDay(items) {
 
 /* ---------------------------- Format helpers ---------------------------- */
 
+function normalizeLocation(rawLocation) {
+    return {
+        ...rawLocation,
+        name: rawLocation.name ?? rawLocation.city ?? ""
+    };
+}
+
+function normalizeLocationSearchResult(rawResult) {
+    return {
+        ...rawResult,
+        name: rawResult.name ?? rawResult.city ?? "",
+        label: rawResult.label ?? buildLocationSearchLabel(rawResult)
+    };
+}
+
+function buildLocationSearchLabel(result) {
+    const name = result.name ?? result.city ?? "";
+    const region = result.region?.trim();
+    const country = result.country ?? "";
+
+    return region
+        ? `${name}, ${region}, ${country}`
+        : `${name}, ${country}`;
+}
+
 function getDateKey(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -830,9 +888,9 @@ function formatRelativeDayLabel(date) {
     const diffMs = target - current;
     const diffDays = Math.round(diffMs / 86400000);
 
-    if (diffDays === 0) return "dzisiaj";
-    if (diffDays === 1) return "jutro";
-    if (diffDays === -1) return "wczoraj";
+    if (diffDays === 0) return t("relativeDays.today");
+    if (diffDays === 1) return t("relativeDays.tomorrow");
+    if (diffDays === -1) return t("relativeDays.yesterday");
 
     return "";
 }
@@ -875,21 +933,21 @@ function formatWind(value) {
     return kmh.toFixed(1);
 }
 
-function buildLocationLabel(city) {
-    const cityName = city.city ?? "";
-    const region = city.region?.trim();
-    const country = city.country ?? "";
+function buildLocationLabel(location) {
+    const name = location.name ?? "";
+    const region = location.region?.trim();
+    const country = location.country ?? "";
 
     if (region) {
         return `
-            <span class="location-main">${cityName}</span>
-            <span class="location-meta"> (${region}, ${country})</span>
+            <span class="location-main">${escapeHtml(name)}</span>
+            <span class="location-meta"> (${escapeHtml(region)}, ${escapeHtml(country)})</span>
         `;
     }
 
     return `
-        <span class="location-main">${cityName}</span>
-        <span class="location-meta"> (${country})</span>
+        <span class="location-main">${escapeHtml(name)}</span>
+        <span class="location-meta"> (${escapeHtml(country)})</span>
     `;
 }
 
@@ -923,6 +981,15 @@ function getPrecipitationClass(value) {
     }
 
     return "value-rain";
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
 }
 
 /* ----------------------------- UI helpers ------------------------------- */
@@ -969,8 +1036,8 @@ function setSearchBusy(isBusy) {
 async function tryReadError(response) {
     try {
         const error = await response.json();
-        return error.message || "Request failed";
+        return error.message || t("errors.generic");
     } catch {
-        return `Request failed with status ${response.status}`;
+        return t("errors.generic");
     }
 }

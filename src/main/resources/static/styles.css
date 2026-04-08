@@ -591,11 +591,6 @@ th .th-unit,
     width: auto;
 }
 
-.location-search-box > button:first-of-type,
-.location-search-box > button:last-of-type {
-    min-width: 120px;
-}
-
 .location-search-results {
     display: grid;
     gap: 8px;

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Weather 2.2</title>
+    <title data-i18n="auth.loginPageTitle">Please sign in</title>
 
     <link rel="stylesheet" href="/styles.css">
     <link rel="stylesheet" href="/login.css">
@@ -11,23 +11,25 @@
 <body>
 <div class="container">
     <header class="page-header">
-        <h1>Please sign in</h1>
-        <p class="subtitle">Log in to manage locations in Weather 2.2</p>
+        <h1 data-i18n="auth.loginTitle">Please sign in</h1>
+        <p class="subtitle" data-i18n="auth.loginSubtitle">
+            Sign in to manage saved locations in Weather 2.2.
+        </p>
     </header>
 
     <!-- Login panel is revealed only after auth check completes. -->
     <section class="panel login-panel" id="login-panel">
-        <div th:if="${param.error}" class="message-error login-message">
-            Invalid username or password
+        <div th:if="${param.error}" class="message-error login-message" data-i18n="auth.invalidCredentials">
+            Invalid username or password.
         </div>
 
-        <div th:if="${param.logout}" class="message-success login-message">
-            You have been logged out
+        <div th:if="${param.logout}" class="message-success login-message" data-i18n="auth.loggedOut">
+            You have been logged out.
         </div>
 
         <form th:action="@{/login}" method="post" class="login-form">
             <div class="form-field">
-                <label for="username">Username</label>
+                <label for="username" data-i18n="auth.usernameLabel">Username</label>
                 <input
                         type="text"
                         id="username"
@@ -39,7 +41,7 @@
             </div>
 
             <div class="form-field">
-                <label for="password">Password</label>
+                <label for="password" data-i18n="auth.passwordLabel">Password</label>
                 <input
                         type="password"
                         id="password"
@@ -50,19 +52,39 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary btn-lg login-submit-btn">Sign in</button>
+                <button
+                        type="submit"
+                        class="btn btn-primary btn-lg login-submit-btn"
+                        data-i18n="auth.signInButton"
+                >
+                    Sign in
+                </button>
             </div>
         </form>
     </section>
 </div>
 
 <footer class="footer">
-    <div>Created by Jakub Heppner</div>
+    <div data-i18n="app.footerAuthor">Created by Jakub Heppner</div>
     <div>jakub.heppner@gmail.com</div>
-    <div>Version 2.2</div>
+    <div data-i18n="app.footerVersionLabel">Version 2.2</div>
 </footer>
 
+<script src="/i18n/messages.en.js"></script>
 <script>
+    function applyStaticTranslations() {
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+            const key = element.dataset.i18n;
+
+            if (element.tagName === "TITLE") {
+                document.title = t(key);
+                return;
+            }
+
+            element.textContent = t(key);
+        });
+    }
+
     async function initLoginPage() {
         const loginPanel = document.getElementById("login-panel");
 
@@ -88,6 +110,7 @@
         }
     }
 
+    applyStaticTranslations();
     initLoginPage();
 </script>
 </body>

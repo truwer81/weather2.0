@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather 2.2</title>
+    <title data-i18n="app.title">Weather 2.2</title>
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 <div class="container">
     <header class="page-header">
-        <h1>Weather 2.2</h1>
-        <p class="subtitle">Current weather overview and forecast for saved locations</p>
+        <h1 data-i18n="app.title">Weather 2.2</h1>
+        <p class="subtitle" data-i18n="app.subtitle">
+            Current weather overview and forecast for saved locations
+        </p>
+
 
         <!-- Authentication actions -->
         <div class="auth-links">
-            <a href="/login.html" id="login-link">Login</a>
+            <a href="/login.html" id="login-link" data-i18n="auth.loginLink">Login</a>
 
             <form action="/logout" method="post" class="logout-form" id="logout-form">
-                <button type="submit" class="link-button">Logout</button>
+                <button type="submit" class="link-button" data-i18n="auth.logoutLink">Logout</button>
             </form>
         </div>
     </header>
@@ -25,8 +28,15 @@
     <!-- Saved locations overview -->
     <section class="panel">
         <div class="panel-header">
-            <h2>Saved locations</h2>
-            <button id="reload-all-btn" type="button" class="btn btn-secondary btn-toolbar btn-md">Reload list</button>
+            <h2 data-i18n="sections.savedLocations">Saved locations</h2>
+            <button
+                    id="reload-all-btn"
+                    type="button"
+                    class="btn btn-secondary btn-toolbar btn-md"
+                    data-i18n="buttons.reloadList"
+            >
+                Reload list
+            </button>
         </div>
 
         <!-- Runtime messages rendered by JavaScript -->
@@ -38,61 +48,61 @@
                 <tr>
                     <th class="col-location">
                         <div class="th-stack">
-                            <span class="th-title">Location</span>
+                            <span class="th-title" data-i18n="labels.location">Location</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Temp.</span>
-                            <span class="th-unit">°C</span>
+                            <span class="th-title" data-i18n="labels.temperatureShort">Temp.</span>
+                            <span class="th-unit" data-i18n="units.temperature">°C</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Feels<br>like</span>
-                            <span class="th-unit">°C</span>
+                            <span class="th-title" data-i18n="labels.feelsLikeShort">Feels like</span>
+                            <span class="th-unit" data-i18n="units.temperature">°C</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Humidity</span>
-                            <span class="th-unit">%</span>
+                            <span class="th-title" data-i18n="labels.humidity">Humidity</span>
+                            <span class="th-unit" data-i18n="units.humidity">%</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Pressure</span>
-                            <span class="th-unit">hPa</span>
+                            <span class="th-title" data-i18n="labels.pressure">Pressure</span>
+                            <span class="th-unit" data-i18n="units.pressure">hPa</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Wind<br>speed</span>
-                            <span class="th-unit">km/h</span>
+                            <span class="th-title" data-i18n="labels.windSpeed">Wind speed</span>
+                            <span class="th-unit" data-i18n="units.windSpeed">km/h</span>
                         </div>
                     </th>
 
                     <th class="col-num">
                         <div class="th-stack">
-                            <span class="th-title">Clouds</span>
-                            <span class="th-unit">%</span>
+                            <span class="th-title" data-i18n="labels.clouds">Clouds</span>
+                            <span class="th-unit" data-i18n="units.clouds">%</span>
                         </div>
                     </th>
 
                     <th class="col-desc">
                         <div class="th-stack">
-                            <span class="th-title">Desc.</span>
+                            <span class="th-title" data-i18n="labels.descriptionShort">Desc.</span>
                         </div>
                     </th>
 
                     <th class="col-actions">
                         <div class="th-stack">
-                            <span class="th-title">Actions</span>
+                            <span class="th-title" data-i18n="labels.actions">Actions</span>
                         </div>
                     </th>
                 </tr>
@@ -105,7 +115,7 @@
 
     <!-- Location create/edit form -->
     <section class="panel" id="city-form-panel">
-        <h2>Manage locations</h2>
+        <h2 data-i18n="sections.manageLocations">Manage locations</h2>
 
         <!-- Search UI is injected by JavaScript -->
         <div id="location-search-container"></div>
@@ -116,57 +126,62 @@
             <div class="form-scroll">
                 <div class="grid">
                     <div class="form-field">
-                        <label for="city">Name or label</label>
+                        <label for="city" data-i18n="labels.name">Name or label</label>
                         <input
                                 type="text"
                                 id="city"
                                 name="city"
                                 placeholder="required"
+                                data-i18n-placeholder="placeholders.name"
                                 required
                         >
                     </div>
 
                     <div class="form-field">
-                        <label for="region">Region</label>
+                        <label for="region" data-i18n="labels.region">Region</label>
                         <input
                                 type="text"
                                 id="region"
                                 name="region"
                                 placeholder="optional"
+                                data-i18n-placeholder="placeholders.region"
                         >
                     </div>
 
                     <div class="form-field">
-                        <label for="country">Country</label>
+                        <label for="country" data-i18n="labels.country">Country</label>
                         <input
                                 type="text"
                                 id="country"
                                 name="country"
                                 placeholder="required"
+                                data-i18n-placeholder="placeholders.country"
                                 required
                         >
                     </div>
 
                     <div class="form-field">
-                        <label for="longitude">Longitude</label>
+                        <label for="longitude" data-i18n="labels.longitude">Longitude</label>
                         <input
                                 type="number"
                                 id="longitude"
                                 name="longitude"
                                 step="any"
                                 placeholder="e.g. 21.0122"
+                                data-i18n-placeholder="placeholders.longitude"
                                 required
                         >
                     </div>
 
                     <div class="form-field">
-                        <label for="latitude">Latitude</label>
+                        <label for="latitude" data-i18n="labels.latitude">Latitude</label>
                         <input
                                 type="number"
                                 id="latitude"
                                 name="latitude"
                                 step="any"
                                 placeholder="e.g. 52.2297"
+                                data-i18n-placeholder="placeholders.latitude"
                                 required
                         >
                     </div>
@@ -174,8 +189,22 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">Add location</button>
-                <button type="button" id="cancel-edit-btn" class="btn btn-secondary btn-md" hidden>
+                <button
+                        type="submit"
+                        id="submit-btn"
+                        class="btn btn-primary btn-lg"
+                        data-i18n="buttons.addLocation"
+                >
+                    Add location
+                </button>
+
+                <button
+                        type="button"
+                        id="cancel-edit-btn"
+                        class="btn btn-secondary btn-md"
+                        data-i18n="buttons.cancel"
+                        hidden
+                >
                     Cancel
                 </button>
             </div>
@@ -184,11 +213,33 @@
 </div>
 
 <footer class="footer">
-    <div>Created by Jakub Heppner</div>
+    <div data-i18n="app.footerAuthor">Created by Jakub Heppner</div>
     <div>jakub.heppner@gmail.com</div>
-    <div>Version 2.2</div>
+    <div data-i18n="app.footerVersionLabel">Version 2.2</div>
 </footer>
 
+<script src="/i18n/messages.en.js"></script>
+<script>
+    function applyStaticTranslations() {
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+            const key = element.dataset.i18n;
+
+            if (element.tagName === "TITLE") {
+                document.title = t(key);
+                return;
+            }
+
+            element.textContent = t(key);
+        });
+
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+            const key = element.dataset.i18nPlaceholder;
+            element.placeholder = t(key);
+        });
+    }
+
+    applyStaticTranslations();
+</script>
 <script src="/app.js"></script>
 </body>
 </html>
