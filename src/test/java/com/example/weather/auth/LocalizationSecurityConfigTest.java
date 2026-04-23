@@ -61,7 +61,7 @@ class LocalizationSecurityConfigTest {
     @Test
     void getCities_isPublic() throws Exception {
         when(localizationService.getAllLocalizations())
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L)));
+                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
         mockMvc.perform(get("/api/cities"))
                 .andExpect(status().isOk())
@@ -111,7 +111,7 @@ class LocalizationSecurityConfigTest {
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L));
+        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
         mockMvc.perform(post("/api/cities")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +130,7 @@ class LocalizationSecurityConfigTest {
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L));
+        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
         mockMvc.perform(put("/api/cities/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -143,7 +143,7 @@ class LocalizationSecurityConfigTest {
     @WithMockUser(roles = "ADMIN")
     void adminUser_canReorderCities() throws Exception {
         when(localizationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.localization.dto.OrderByDTO>>any()))
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L)));
+                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
         mockMvc.perform(put("/api/cities/order")
                         .contentType(MediaType.APPLICATION_JSON)
