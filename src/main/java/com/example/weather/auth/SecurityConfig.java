@@ -29,18 +29,15 @@ public class SecurityConfig {
                                 "/styles.css",
                                 "/login.css",
                                 "/app.js",
-                                "/api/auth/me",
-                                "/api/cities/**",
-                                "/api/weather/**",
-                                "/api/locations/**",
                                 "/i18n/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/cities/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/cities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/cities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/cities/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/weather/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/locations/search").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
