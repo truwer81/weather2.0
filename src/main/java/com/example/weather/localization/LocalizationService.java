@@ -3,17 +3,21 @@ package com.example.weather.localization;
 import com.example.weather.common.BadRequestException;
 import com.example.weather.common.LocalizationNotFoundException;
 import com.example.weather.localization.dto.OrderByDTO;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class LocalizationService {
 
     private final LocalizationRepository localizationRepository;
+    private final EntityManager entityManager;
 
     @Transactional
     public Localization createLocalization(String city, Double longitude, Double latitude, String region, String country) {
@@ -24,30 +28,28 @@ public class LocalizationService {
             region = null;
         }
 
-        long topSortOrder = localizationRepository.findTopByOrderBySortOrderDesc()
+        long topSortOrder = localizationRepository.findTopByOwnerIsNullOrderBySortOrderDesc()
                 .map(Localization::getSortOrder)
                 .map(sortOrder -> sortOrder + 1)
                 .orElse(0L);
 
-        var localization = new Localization(null, city, country, region, longitude, latitude, topSortOrder);
+        var localization = new Localization(null, city, country, region, longitude, latitude, topSortOrder, null);
         return localizationRepository.save(localization);
     }
 
     @Transactional(readOnly = true)
     public List<Localization> getAllLocalizations() {
-        return localizationRepository.findAll();
+        return localizationRepository.findAllByOwnerIsNullOrderBySortOrderAsc();
     }
 
     @Transactional(readOnly = true)
     public Localization getLocalization(Long id) {
-        return localizationRepository.findById(id)
-                .orElseThrow(() -> new LocalizationNotFoundException(id));
+        return getSharedLocalization(id);
     }
 
     @Transactional
     public void deleteLocalization(long localizationId) {
-        var localization = localizationRepository.findById(localizationId)
-                .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
+        var localization = getSharedLocalization(localizationId);
 
         localizationRepository.delete(localization);
     }
@@ -64,8 +66,7 @@ public class LocalizationService {
         validateCoordinates(longitude, latitude);
         validateRequiredFields(city, country);
 
-        var localization = localizationRepository.findById(localizationId)
-                .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
+        var localization = getSharedLocalization(localizationId);
 
         localization.setCity(city.trim());
         localization.setCountry(country.trim());
@@ -80,6 +81,7 @@ public class LocalizationService {
     @Transactional
     public List<Localization> saveDisplayOrder(List<OrderByDTO> orders) {
         validateOrders(orders);
+        validateSharedOrderScope(orders);
 
         for (OrderByDTO item : orders) {
             localizationRepository.updateSortOrder(item.localizationId(), -item.sortOrder() - 1000);
@@ -89,7 +91,10 @@ public class LocalizationService {
             localizationRepository.updateSortOrder(item.localizationId(), item.sortOrder());
         }
 
-        return localizationRepository.findAll();
+        entityManager.flush();
+        entityManager.clear();
+
+        return localizationRepository.findAllByOwnerIsNullOrderBySortOrderAsc();
     }
 
     private void validateCoordinates(Double longitude, Double latitude) {
@@ -130,5 +135,26 @@ public class LocalizationService {
         if (!unique) {
             throw new BadRequestException("Sort order values must be unique");
         }
+    }
+
+    private void validateSharedOrderScope(List<OrderByDTO> orders) {
+        Set<Long> uniqueIds = orders.stream()
+                .map(OrderByDTO::localizationId)
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
+        if (uniqueIds.contains(null)) {
+            throw new BadRequestException("Localization id is required for display order");
+        }
+
+        long sharedCount = localizationRepository.countByIdInAndOwnerIsNull(uniqueIds);
+
+        if (sharedCount != uniqueIds.size()) {
+            throw new BadRequestException("Display order payload can contain shared localizations only");
+        }
+    }
+
+    private Localization getSharedLocalization(Long id) {
+        return localizationRepository.findByIdAndOwnerIsNull(id)
+                .orElseThrow(() -> new LocalizationNotFoundException(id));
     }
 }

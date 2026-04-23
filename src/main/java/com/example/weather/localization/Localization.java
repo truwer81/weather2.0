@@ -1,5 +1,6 @@
 package com.example.weather.localization;
 
+import com.example.weather.auth.AppUser;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,4 +25,8 @@ public class Localization {
     private Double latitude;
     @Column(name = "sort_order")
     private Long sortOrder;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_user_id")
+    private AppUser owner;
 }
