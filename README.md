@@ -197,3 +197,21 @@ or
 ```shell
 docker compose -f docker-compose.prod.yml -p weather-prod down -v
 ```
+
+
+
+## Local development users
+
+For manual local testing, example non-admin users can be inserted into the local database with the SQL stored in `dev-tools/local-users.sql`.
+
+These accounts are intended for local development only and should not be used in shared or production environments.
+```shell
+INSERT INTO app_users (username, password_hash, enabled)
+SELECT 'user1', '$2a$12$XWfc2p14XqQe8Fct.O8P2.1/yILxu1vEkoQ76O1TXpX.WkNjDZFGW', TRUE
+WHERE NOT EXISTS (SELECT 1 FROM app_users WHERE username = 'user1');
+
+INSERT INTO app_users (username, password_hash, enabled)
+SELECT 'user2', '$2a$12$4tRbPusFkyB8gIzUQf8vxujElAG4cvFfNIPm5yzXNbOjPgpOC5d3q', TRUE
+WHERE NOT EXISTS (SELECT 1 FROM app_users WHERE username = 'user2');
+docker compose -f docker-compose.prod.yml -p weather-prod down -v
+```

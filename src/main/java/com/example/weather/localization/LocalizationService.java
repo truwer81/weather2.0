@@ -1,5 +1,7 @@
 package com.example.weather.localization;
 
+import com.example.weather.auth.AppUser;
+import com.example.weather.auth.AppUserRepository;
 import com.example.weather.common.BadRequestException;
 import com.example.weather.common.LocalizationNotFoundException;
 import com.example.weather.localization.dto.OrderByDTO;
@@ -17,6 +19,7 @@ import java.util.Set;
 public class LocalizationService {
 
     private final LocalizationRepository localizationRepository;
+    private final AppUserRepository appUserRepository;
     private final EntityManager entityManager;
 
     @Transactional
@@ -43,6 +46,11 @@ public class LocalizationService {
     }
 
     @Transactional(readOnly = true)
+    public List<Localization> getPrivateLocalizations(Long ownerId) {
+        return localizationRepository.findAllByOwnerIdOrderBySortOrderAsc(ownerId);
+    }
+
+    @Transactional(readOnly = true)
     public Localization getLocalization(Long id) {
         return getSharedLocalization(id);
     }
@@ -50,6 +58,13 @@ public class LocalizationService {
     @Transactional
     public void deleteLocalization(long localizationId) {
         var localization = getSharedLocalization(localizationId);
+
+        localizationRepository.delete(localization);
+    }
+
+    @Transactional
+    public void deletePrivateLocalization(long ownerId, long localizationId) {
+        var localization = getOwnedLocalization(ownerId, localizationId);
 
         localizationRepository.delete(localization);
     }
@@ -67,6 +82,58 @@ public class LocalizationService {
         validateRequiredFields(city, country);
 
         var localization = getSharedLocalization(localizationId);
+
+        localization.setCity(city.trim());
+        localization.setCountry(country.trim());
+        localization.setRegion(region == null || region.isBlank() ? null : region.trim());
+        localization.setLongitude(longitude);
+        localization.setLatitude(latitude);
+
+        return localizationRepository.save(localization);
+    }
+
+    @Transactional
+    public Localization createPrivateLocalization(
+            Long ownerId,
+            String city,
+            Double longitude,
+            Double latitude,
+            String region,
+            String country
+    ) {
+        validateCoordinates(longitude, latitude);
+        validateRequiredFields(city, country);
+
+        if (region != null && region.isBlank()) {
+            region = null;
+        }
+
+        long topSortOrder = localizationRepository.findTopByOwnerIdOrderBySortOrderDesc(ownerId)
+                .map(Localization::getSortOrder)
+                .map(sortOrder -> sortOrder + 1)
+                .orElse(0L);
+
+        AppUser owner = appUserRepository.findById(ownerId)
+                .orElseThrow(() -> new LocalizationNotFoundException(ownerId));
+
+        var localization = new Localization(null, city, country, region, longitude, latitude, topSortOrder, owner);
+        return localizationRepository.save(localization);
+    }
+
+    @Transactional
+    public Localization updatePrivateLocalization(
+            long ownerId,
+            long localizationId,
+            String city,
+            Double longitude,
+            Double latitude,
+            String region,
+            String country
+    ) {
+        validateCoordinates(longitude, latitude);
+        validateRequiredFields(city, country);
+
+        var localization = getOwnedLocalization(ownerId, localizationId);
 
         localization.setCity(city.trim());
         localization.setCountry(country.trim());
@@ -95,6 +162,25 @@ public class LocalizationService {
         entityManager.clear();
 
         return localizationRepository.findAllByOwnerIsNullOrderBySortOrderAsc();
+    }
+
+    @Transactional
+    public List<Localization> savePrivateDisplayOrder(Long ownerId, List<OrderByDTO> orders) {
+        validateOrders(orders);
+        validatePrivateOrderScope(ownerId, orders);
+
+        for (OrderByDTO item : orders) {
+            localizationRepository.updateSortOrder(item.localizationId(), -item.sortOrder() - 1000);
+        }
+
+        for (OrderByDTO item : orders) {
+            localizationRepository.updateSortOrder(item.localizationId(), item.sortOrder());
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+        return localizationRepository.findAllByOwnerIdOrderBySortOrderAsc(ownerId);
     }
 
     private void validateCoordinates(Double longitude, Double latitude) {
@@ -153,8 +239,29 @@ public class LocalizationService {
         }
     }
 
+    private void validatePrivateOrderScope(Long ownerId, List<OrderByDTO> orders) {
+        Set<Long> uniqueIds = orders.stream()
+                .map(OrderByDTO::localizationId)
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
+
+        if (uniqueIds.contains(null)) {
+            throw new BadRequestException("Localization id is required for display order");
+        }
+
+        long ownedCount = localizationRepository.countByIdInAndOwnerId(uniqueIds, ownerId);
+
+        if (ownedCount != uniqueIds.size()) {
+            throw new BadRequestException("Display order payload can contain owned localizations only");
+        }
+    }
+
     private Localization getSharedLocalization(Long id) {
         return localizationRepository.findByIdAndOwnerIsNull(id)
                 .orElseThrow(() -> new LocalizationNotFoundException(id));
+    }
+
+    private Localization getOwnedLocalization(Long ownerId, Long localizationId) {
+        return localizationRepository.findByIdAndOwnerId(localizationId, ownerId)
+                .orElseThrow(() -> new LocalizationNotFoundException(localizationId));
     }
 }
