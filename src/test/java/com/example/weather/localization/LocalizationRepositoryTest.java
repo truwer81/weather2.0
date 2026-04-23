@@ -67,20 +67,87 @@ class LocalizationRepositoryTest {
         assertThat(count).isEqualTo(1L);
     }
 
+    @Test
+    void findAllByOwnerIdOrderBySortOrderAsc_returnsOnlyOwnedRows() {
+        AppUser owner = persistOwner("owner-a");
+        AppUser foreignOwner = persistOwner("owner-b");
+
+        entityManager.persistAndFlush(new Localization(null, "Warsaw", "Poland", "Region", 21.0, 52.0, 2L, owner));
+        entityManager.persistAndFlush(new Localization(null, "Berlin", "Germany", "Region", 13.4, 52.5, 1L, foreignOwner));
+        entityManager.persistAndFlush(new Localization(null, "Gdansk", "Poland", "Region", 18.6, 54.3, 1L, owner));
+
+        List<Localization> results = localizationRepository.findAllByOwnerIdOrderBySortOrderAsc(owner.getId());
+
+        assertThat(results)
+                .extracting(Localization::getCity)
+                .containsExactly("Gdansk", "Warsaw");
+        assertThat(results)
+                .allMatch(localization -> localization.getOwner() != null && localization.getOwner().getId().equals(owner.getId()));
+    }
+
+    @Test
+    void findByIdAndOwnerId_returnsEmptyForForeignRow() {
+        AppUser owner = persistOwner("owner-a");
+        AppUser foreignOwner = persistOwner("owner-b");
+        Localization foreignLocalization = entityManager.persistAndFlush(
+                new Localization(null, "Berlin", "Germany", "Region", 13.4, 52.5, 1L, foreignOwner)
+        );
+
+        assertThat(localizationRepository.findByIdAndOwnerId(foreignLocalization.getId(), owner.getId())).isEmpty();
+    }
+
+    @Test
+    void findTopByOwnerIdOrderBySortOrderDesc_usesOnlyOwnerScope() {
+        AppUser owner = persistOwner("owner-a");
+        AppUser foreignOwner = persistOwner("owner-b");
+
+        entityManager.persistAndFlush(new Localization(null, "Warsaw", "Poland", "Region", 21.0, 52.0, 1L, owner));
+        entityManager.persistAndFlush(new Localization(null, "Gdansk", "Poland", "Region", 18.6, 54.3, 2L, owner));
+        entityManager.persistAndFlush(new Localization(null, "Berlin", "Germany", "Region", 13.4, 52.5, 5L, foreignOwner));
+
+        Localization result = localizationRepository.findTopByOwnerIdOrderBySortOrderDesc(owner.getId()).orElseThrow();
+
+        assertThat(result.getCity()).isEqualTo("Gdansk");
+        assertThat(result.getSortOrder()).isEqualTo(2L);
+    }
+
+    @Test
+    void countByIdInAndOwnerId_countsOnlyOwnedIds() {
+        AppUser owner = persistOwner("owner-a");
+        AppUser foreignOwner = persistOwner("owner-b");
+        Localization owned = entityManager.persistAndFlush(
+                new Localization(null, "Warsaw", "Poland", "Region", 21.0, 52.0, 1L, owner)
+        );
+        Localization foreignLocalization = entityManager.persistAndFlush(
+                new Localization(null, "Berlin", "Germany", "Region", 13.4, 52.5, 2L, foreignOwner)
+        );
+
+        long count = localizationRepository.countByIdInAndOwnerId(
+                List.of(owned.getId(), foreignLocalization.getId()),
+                owner.getId()
+        );
+
+        assertThat(count).isEqualTo(1L);
+    }
+
     private Localization persistSharedLocalization(String city, Long sortOrder) {
         Localization localization = new Localization(null, city, "Poland", "Region", 21.0, 52.0, sortOrder, null);
         return entityManager.persistAndFlush(localization);
     }
 
     private Localization persistPrivateLocalization(String city, Long sortOrder) {
-        AppUser owner = entityManager.persistAndFlush(AppUser.builder()
-                .username(city.toLowerCase() + "_owner")
+        AppUser owner = persistOwner(city.toLowerCase() + "_owner");
+
+        Localization localization = new Localization(null, city, "Germany", "Region", 13.4, 52.5, sortOrder, owner);
+        return entityManager.persistAndFlush(localization);
+    }
+
+    private AppUser persistOwner(String username) {
+        return entityManager.persistAndFlush(AppUser.builder()
+                .username(username)
                 .passwordHash("hash")
                 .enabled(true)
                 .createdAt(LocalDateTime.now())
                 .build());
-
-        Localization localization = new Localization(null, city, "Germany", "Region", 13.4, 52.5, sortOrder, owner);
-        return entityManager.persistAndFlush(localization);
     }
 }

@@ -1,4 +1,6 @@
 package com.example.weather.localization;
+import com.example.weather.auth.AppUser;
+import com.example.weather.auth.AppUserRepository;
 import com.example.weather.common.BadRequestException;
 import com.example.weather.common.LocalizationNotFoundException;
 import com.example.weather.localization.dto.OrderByDTO;
@@ -28,6 +30,9 @@ class LocalizationServiceTest {
 
     @Mock
     private LocalizationRepository localizationRepository;
+
+    @Mock
+    private AppUserRepository appUserRepository;
 
     @Mock
     private EntityManager entityManager;
@@ -142,5 +147,128 @@ class LocalizationServiceTest {
                 .hasMessageContaining("shared localizations only");
 
         verify(localizationRepository, never()).updateSortOrder(anyLong(), anyLong());
+    }
+
+    @Test
+    void getPrivateLocalizations_returnsOnlyCurrentUserRows() {
+        List<Localization> ownedRows = List.of(
+                new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, buildOwner(10L, "owner"))
+        );
+        when(localizationRepository.findAllByOwnerIdOrderBySortOrderAsc(10L)).thenReturn(ownedRows);
+
+        List<Localization> results = localizationService.getPrivateLocalizations(10L);
+
+        assertThat(results).isEqualTo(ownedRows);
+        verify(localizationRepository).findAllByOwnerIdOrderBySortOrderAsc(10L);
+    }
+
+    @Test
+    void createPrivateLocalization_setsOwnerAndOwnerScopedSortOrder() {
+        AppUser owner = buildOwner(10L, "owner");
+        when(localizationRepository.findTopByOwnerIdOrderBySortOrderDesc(10L))
+                .thenReturn(Optional.of(new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 2L, owner)));
+        when(appUserRepository.findById(10L)).thenReturn(Optional.of(owner));
+        when(localizationRepository.save(any(Localization.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Localization result = localizationService.createPrivateLocalization(10L, "Hamburg", 9.9937, 53.5511, "Hamburg", "Germany");
+
+        ArgumentCaptor<Localization> captor = ArgumentCaptor.forClass(Localization.class);
+        verify(localizationRepository).save(captor.capture());
+
+        Localization saved = captor.getValue();
+        assertThat(saved.getOwner()).isEqualTo(owner);
+        assertThat(saved.getSortOrder()).isEqualTo(3L);
+        assertThat(result.getOwner()).isEqualTo(owner);
+    }
+
+    @Test
+    void updatePrivateLocalization_updatesOwnedRow() {
+        AppUser owner = buildOwner(10L, "owner");
+        Localization owned = new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner);
+        when(localizationRepository.findByIdAndOwnerId(1L, 10L)).thenReturn(Optional.of(owned));
+        when(localizationRepository.save(owned)).thenReturn(owned);
+
+        Localization result = localizationService.updatePrivateLocalization(10L, 1L, "Hamburg", 9.9937, 53.5511, "Hamburg", "Germany");
+
+        assertThat(result.getCity()).isEqualTo("Hamburg");
+        assertThat(result.getRegion()).isEqualTo("Hamburg");
+    }
+
+    @Test
+    void updatePrivateLocalization_throwsNotFoundForForeignRow() {
+        when(localizationRepository.findByIdAndOwnerId(99L, 10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> localizationService.updatePrivateLocalization(10L, 99L, "Berlin", 13.4050, 52.5200, "Berlin", "Germany"))
+                .isInstanceOf(LocalizationNotFoundException.class)
+                .hasMessageContaining("99");
+    }
+
+    @Test
+    void deletePrivateLocalization_deletesOwnedRow() {
+        AppUser owner = buildOwner(10L, "owner");
+        Localization owned = new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner);
+        when(localizationRepository.findByIdAndOwnerId(1L, 10L)).thenReturn(Optional.of(owned));
+
+        localizationService.deletePrivateLocalization(10L, 1L);
+
+        verify(localizationRepository).delete(owned);
+    }
+
+    @Test
+    void deletePrivateLocalization_throwsNotFoundForForeignRow() {
+        when(localizationRepository.findByIdAndOwnerId(7L, 10L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> localizationService.deletePrivateLocalization(10L, 7L))
+                .isInstanceOf(LocalizationNotFoundException.class)
+                .hasMessageContaining("7");
+        verify(localizationRepository, never()).delete(any());
+    }
+
+    @Test
+    void savePrivateDisplayOrder_reordersOwnedRows() {
+        List<OrderByDTO> orders = List.of(
+                new OrderByDTO(1L, 1L),
+                new OrderByDTO(2L, 2L)
+        );
+        AppUser owner = buildOwner(10L, "owner");
+        List<Localization> reordered = List.of(
+                new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner),
+                new Localization(2L, "Hamburg", "Germany", "Hamburg", 9.9937, 53.5511, 2L, owner)
+        );
+
+        when(localizationRepository.countByIdInAndOwnerId(anyCollection(), anyLong())).thenReturn(2L);
+        when(localizationRepository.findAllByOwnerIdOrderBySortOrderAsc(10L)).thenReturn(reordered);
+
+        List<Localization> result = localizationService.savePrivateDisplayOrder(10L, orders);
+
+        assertThat(result).isEqualTo(reordered);
+        verify(localizationRepository, times(4)).updateSortOrder(anyLong(), anyLong());
+        verify(entityManager).flush();
+        verify(entityManager).clear();
+    }
+
+    @Test
+    void savePrivateDisplayOrder_rejectsPayloadWithForeignId() {
+        List<OrderByDTO> orders = List.of(
+                new OrderByDTO(1L, 1L),
+                new OrderByDTO(2L, 2L)
+        );
+        when(localizationRepository.countByIdInAndOwnerId(anyCollection(), anyLong())).thenReturn(1L);
+
+        assertThatThrownBy(() -> localizationService.savePrivateDisplayOrder(10L, orders))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("owned localizations only");
+
+        verify(localizationRepository, never()).updateSortOrder(anyLong(), anyLong());
+    }
+
+    private AppUser buildOwner(Long id, String username) {
+        AppUser owner = new AppUser();
+        owner.setId(id);
+        owner.setUsername(username);
+        owner.setPasswordHash("hash");
+        owner.setEnabled(true);
+        return owner;
     }
 }

@@ -19,9 +19,17 @@ public interface LocalizationRepository extends JpaRepository<Localization, Long
 
     Optional<Localization> findTopByOwnerIsNullOrderBySortOrderDesc();
 
+    List<Localization> findAllByOwnerIdOrderBySortOrderAsc(Long ownerId);
+
+    Optional<Localization> findByIdAndOwnerId(Long id, Long ownerId);
+
+    Optional<Localization> findTopByOwnerIdOrderBySortOrderDesc(Long ownerId);
+
     boolean existsByIdAndOwnerIsNull(Long id);
 
     long countByIdInAndOwnerIsNull(Collection<Long> ids);
+
+    long countByIdInAndOwnerId(Collection<Long> ids, Long ownerId);
 
     @Modifying
     @Query("""

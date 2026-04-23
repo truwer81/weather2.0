@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/cities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/cities/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/cities/**").hasRole("ADMIN")
+                        .requestMatchers("/api/my/locations/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/weather/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/locations/search").permitAll()
                         .anyRequest().authenticated()
