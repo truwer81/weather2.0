@@ -23,7 +23,7 @@ public class WeatherResponseDTO {
     private Long forecastTimestamp;
 
     @JsonProperty("name")
-    private String cityName;
+    private String locationName;
 
     @JsonProperty("weather")
     private List<WeatherDescription> weather;

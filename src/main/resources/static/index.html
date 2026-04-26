@@ -17,7 +17,7 @@
 
         <!-- Authentication actions -->
         <div class="auth-links">
-            <a href="/login.html" id="login-link" data-i18n="auth.loginLink">Login</a>
+            <a href="/login" id="login-link" data-i18n="auth.loginLink">Login</a>
 
             <form action="/logout" method="post" class="logout-form" id="logout-form">
                 <button type="submit" class="link-button" data-i18n="auth.logoutLink">Logout</button>
@@ -108,29 +108,29 @@
                 </tr>
                 </thead>
 
-                <tbody id="cities-table-body"></tbody>
+                <tbody id="locations-table-body"></tbody>
             </table>
         </div>
     </section>
 
     <!-- Location create/edit form -->
-    <section class="panel" id="city-form-panel">
+    <section class="panel" id="location-form-panel">
         <h2 data-i18n="sections.manageLocations">Manage locations</h2>
 
         <!-- Search UI is injected by JavaScript -->
         <div id="location-search-container"></div>
 
-        <form id="city-form">
-            <input type="hidden" id="editing-id">
+        <form id="location-form">
+            <input type="hidden" id="editing-location-id">
 
             <div class="form-scroll">
                 <div class="grid">
                     <div class="form-field">
-                        <label for="city" data-i18n="labels.name">Name or label</label>
+                        <label for="name" data-i18n="labels.name">Name or label</label>
                         <input
                                 type="text"
-                                id="city"
-                                name="city"
+                                id="name"
+                                name="name"
                                 placeholder="required"
                                 data-i18n-placeholder="placeholders.name"
                                 required

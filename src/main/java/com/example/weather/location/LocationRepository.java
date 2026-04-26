@@ -1,4 +1,4 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,21 +9,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface LocalizationRepository extends JpaRepository<Localization, Long> {
+public interface LocationRepository extends JpaRepository<Location, Long> {
 
-    Optional<Localization> findTopByOrderBySortOrderDesc();
+    Optional<Location> findTopByOrderBySortOrderDesc();
 
-    List<Localization> findAllByOwnerIsNullOrderBySortOrderAsc();
+    List<Location> findAllByOwnerIsNullOrderBySortOrderAsc();
 
-    Optional<Localization> findByIdAndOwnerIsNull(Long id);
+    Optional<Location> findByIdAndOwnerIsNull(Long id);
 
-    Optional<Localization> findTopByOwnerIsNullOrderBySortOrderDesc();
+    Optional<Location> findTopByOwnerIsNullOrderBySortOrderDesc();
 
-    List<Localization> findAllByOwnerIdOrderBySortOrderAsc(Long ownerId);
+    List<Location> findAllByOwnerIdOrderBySortOrderAsc(Long ownerId);
 
-    Optional<Localization> findByIdAndOwnerId(Long id, Long ownerId);
+    Optional<Location> findByIdAndOwnerId(Long id, Long ownerId);
 
-    Optional<Localization> findTopByOwnerIdOrderBySortOrderDesc(Long ownerId);
+    Optional<Location> findTopByOwnerIdOrderBySortOrderDesc(Long ownerId);
 
     boolean existsByIdAndOwnerIsNull(Long id);
 
@@ -33,7 +33,7 @@ public interface LocalizationRepository extends JpaRepository<Localization, Long
 
     @Modifying
     @Query("""
-        update Localization e
+        update Location e
         set e.sortOrder = :sortOrder
         where e.id = :id
     """)

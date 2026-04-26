@@ -18,13 +18,13 @@ public class OpenWeatherController {
     private final OpenWeatherService openWeatherService;
 
     @GetMapping
-    public WeatherDTO getWeather(@RequestParam Long cityId) {
-        return openWeatherService.getWeatherForLocalization(cityId);
+    public WeatherDTO getWeather(@RequestParam Long locationId) {
+        return openWeatherService.getWeatherForLocation(locationId);
     }
 
     @GetMapping("/forecast")
-    public List<ForecastDTO> getForecasts(@RequestParam Long cityId) {
-        return openWeatherService.getForecastsForLocalization(cityId);
+    public List<ForecastDTO> getForecasts(@RequestParam Long locationId) {
+        return openWeatherService.getForecastsForLocation(locationId);
     }
 
 }

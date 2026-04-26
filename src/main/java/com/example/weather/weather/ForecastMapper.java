@@ -1,6 +1,6 @@
 package com.example.weather.weather;
 
-import com.example.weather.localization.Localization;
+import com.example.weather.location.Location;
 import com.example.weather.weather.dto.ForecastDTO;
 import com.example.weather.weather.dto.ForecastResponseDTO;
 
@@ -15,26 +15,26 @@ public final class ForecastMapper {
     private ForecastMapper() {
     }
 
-    public static List<Forecast> toEntities(Localization localization, ForecastResponseDTO response) {
+    public static List<Forecast> toEntities(Location location, ForecastResponseDTO response) {
         if (response == null || response.list() == null || response.list().isEmpty()) {
             return Collections.emptyList();
         }
 
-        var timezoneSeconds = response.city() != null ? response.city().timezone() : null;
+        var timezoneSeconds = response.name() != null ? response.name().timezone() : null;
 
         return response.list().stream()
-                .map(item -> toEntity(localization, item, timezoneSeconds))
+                .map(item -> toEntity(location, item, timezoneSeconds))
                 .toList();
     }
 
     public static Forecast toEntity(
-            Localization localization,
+            Location location,
             ForecastResponseDTO.ForecastItemDTO item,
             Integer timezoneSeconds
     ) {
         var forecast = new Forecast();
 
-        forecast.setLocalization(localization);
+        forecast.setLocation(location);
         forecast.setForecastTime(toTimestamp(item.dt(), timezoneSeconds));
         forecast.setTemperature(item.main() != null ? item.main().temp() : 0.0);
         forecast.setFeelsLike(item.main() != null ? item.main().feelsLike() : 0.0);

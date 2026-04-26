@@ -1,8 +1,8 @@
-package com.example.weather.localization.dto;
+package com.example.weather.location.dto;
 
-public record LocalizationSearchResultDTO(
+public record LocationSearchResultDTO(
         String label,
-        String city,
+        String name,
         String region,
         String country,
         Double latitude,

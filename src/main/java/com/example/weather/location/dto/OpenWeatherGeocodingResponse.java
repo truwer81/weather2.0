@@ -1,4 +1,4 @@
-package com.example.weather.localization.dto;
+package com.example.weather.location.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

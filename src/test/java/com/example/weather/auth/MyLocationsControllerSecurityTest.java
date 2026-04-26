@@ -1,8 +1,8 @@
 package com.example.weather.auth;
 
-import com.example.weather.localization.Localization;
-import com.example.weather.localization.LocalizationService;
-import com.example.weather.localization.MyLocationsController;
+import com.example.weather.location.Location;
+import com.example.weather.location.LocationService;
+import com.example.weather.location.MyLocationsController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,7 +32,7 @@ class MyLocationsControllerSecurityTest {
 
     private static final String CREATE_PAYLOAD = """
             {
-              "city": "Berlin",
+              "name": "Berlin",
               "country": "Germany",
               "region": "Berlin",
               "longitude": 13.4050,
@@ -44,7 +44,7 @@ class MyLocationsControllerSecurityTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private LocalizationService localizationService;
+    private LocationService locationService;
 
     @MockBean
     private AppUserRepository appUserRepository;
@@ -56,12 +56,12 @@ class MyLocationsControllerSecurityTest {
     @WithMockUser(username = "owner", roles = "USER")
     void authenticatedUser_canGetMyLocations() throws Exception {
         when(appUserRepository.findByUsername("owner")).thenReturn(Optional.of(buildUser(10L, "owner")));
-        when(localizationService.getPrivateLocalizations(10L))
-                .thenReturn(List.of(new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, buildUser(10L, "owner"))));
+        when(locationService.getPrivateLocations(10L))
+                .thenReturn(List.of(new Location(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, buildUser(10L, "owner"))));
 
         mockMvc.perform(get("/api/my/locations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Berlin"));
+                .andExpect(jsonPath("$[0].name").value("Berlin"));
     }
 
     @Test
@@ -76,20 +76,20 @@ class MyLocationsControllerSecurityTest {
     void authenticatedUser_canPostMyLocation() throws Exception {
         AppUser owner = buildUser(10L, "owner");
         when(appUserRepository.findByUsername("owner")).thenReturn(Optional.of(owner));
-        when(localizationService.createPrivateLocalization(
+        when(locationService.createPrivateLocation(
                 anyLong(),
                 anyString(),
                 anyDouble(),
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner));
+        )).thenReturn(new Location(1L, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner));
 
         mockMvc.perform(post("/api/my/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Berlin"));
+                .andExpect(jsonPath("$.name").value("Berlin"));
     }
 
     private AppUser buildUser(Long id, String username) {

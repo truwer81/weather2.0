@@ -1,7 +1,7 @@
 package com.example.weather.weather;
 
 import com.example.weather.common.OpenWeatherClientException;
-import com.example.weather.localization.Localization;
+import com.example.weather.location.Location;
 import com.example.weather.weather.dto.ForecastResponseDTO;
 import com.example.weather.weather.dto.WeatherResponseDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,9 +39,9 @@ public class OpenWeatherApiClient {
         this.apiKey = apiKey;
     }
 
-    public WeatherResponseDTO getCurrentWeather(Localization localization) throws OpenWeatherClientException {
+    public WeatherResponseDTO getCurrentWeather(Location location) throws OpenWeatherClientException {
         try {
-            String url = buildUrl(localization, baseUrl);
+            String url = buildUrl(location, baseUrl);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -66,9 +66,9 @@ public class OpenWeatherApiClient {
         }
     }
 
-    public ForecastResponseDTO getForecast(Localization localization) throws OpenWeatherClientException {
+    public ForecastResponseDTO getForecast(Location location) throws OpenWeatherClientException {
         try {
-            String url = buildForecastUrl(localization, proUrl);
+            String url = buildForecastUrl(location, proUrl);
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -93,20 +93,20 @@ public class OpenWeatherApiClient {
         }
     }
 
-    private String buildForecastUrl(Localization localization, String url) {
+    private String buildForecastUrl(Location location, String url) {
         return url
-                + "?lat=" + localization.getLatitude()
-                + "&lon=" + localization.getLongitude()
+                + "?lat=" + location.getLatitude()
+                + "&lon=" + location.getLongitude()
                 + "&appid=" + apiKey
                 + "&units=metric"
                 + "&lang=en"
                 + "&cnt=16";
     }
 
-    private String buildUrl(Localization localization, String url) {
+    private String buildUrl(Location location, String url) {
         return url
-                + "?lat=" + localization.getLatitude()
-                + "&lon=" + localization.getLongitude()
+                + "?lat=" + location.getLatitude()
+                + "&lon=" + location.getLongitude()
                 + "&appid=" + apiKey
                 + "&units=metric";
     }

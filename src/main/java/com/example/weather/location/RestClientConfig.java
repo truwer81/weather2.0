@@ -1,4 +1,4 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

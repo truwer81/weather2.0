@@ -2,8 +2,8 @@ package com.example.weather.weather;
 
 import com.example.weather.common.ExternalServiceException;
 import com.example.weather.common.OpenWeatherClientException;
-import com.example.weather.localization.Localization;
-import com.example.weather.localization.LocalizationService;
+import com.example.weather.location.Location;
+import com.example.weather.location.LocationService;
 import com.example.weather.weather.dto.ForecastDTO;
 import com.example.weather.weather.dto.WeatherDTO;
 import lombok.RequiredArgsConstructor;
@@ -24,49 +24,49 @@ public class OpenWeatherService {
 
     private final WeatherRepository weatherRepository;
     private final ForecastRepository forecastRepository;
-    private final LocalizationService localizationService;
+    private final LocationService locationService;
     private final OpenWeatherApiClient openWeatherApiClient;
 
     @Transactional
-    public WeatherDTO getWeatherForLocalization(Long localizationId) {
-        var localization = localizationService.getLocalization(localizationId);
+    public WeatherDTO getWeatherForLocation(Long locationId) {
+        var location = locationService.getSharedLocation(locationId);
 
-        return weatherRepository.findTopByLocalizationIdOrderByFetchedAtDesc(localizationId)
+        return weatherRepository.findTopByLocationIdOrderByFetchedAtDesc(locationId)
                 .filter(weather -> !isWeatherExpired(weather))
                 .map(weather -> {
-                    log.info("Using cached weather for localization {}", localizationId);
+                    log.info("Using cached weather for location {}", locationId);
                     return WeatherMapper.toDTO(weather);
                 })
-                .orElseGet(() -> fetchAndSaveWeather(localization));
+                .orElseGet(() -> fetchAndSaveWeather(location));
     }
 
     @Transactional
-    public List<ForecastDTO> getForecastsForLocalization(Long localizationId) {
-        var localization = localizationService.getLocalization(localizationId);
-        var forecasts = forecastRepository.findAllByLocalizationIdOrderByForecastTimeAsc(localizationId);
+    public List<ForecastDTO> getForecastsForLocation(Long locationId) {
+        var location = locationService.getSharedLocation(locationId);
+        var forecasts = forecastRepository.findAllByLocationIdOrderByForecastTimeAsc(locationId);
 
         if (forecasts.isEmpty()) {
-            log.info("No cached forecast found for localization {}, fetching from API", localizationId);
-            return fetchAndSaveForecast(localization);
+            log.info("No cached forecast found for location {}, fetching from API", locationId);
+            return fetchAndSaveForecast(location);
         }
 
         var firstForecast = forecasts.getFirst();
 
         if (!isForecastExpired(firstForecast)) {
-            log.info("Using cached forecast for localization {}", localizationId);
+            log.info("Using cached forecast for location {}", locationId);
             return ForecastMapper.toDTOList(forecasts);
         }
 
-        log.info("Cached forecast expired for localization {}, fetching from API", localizationId);
-        return fetchAndSaveForecast(localization);
+        log.info("Cached forecast expired for location {}, fetching from API", locationId);
+        return fetchAndSaveForecast(location);
     }
 
-    private WeatherDTO fetchAndSaveWeather(Localization localization) {
+    private WeatherDTO fetchAndSaveWeather(Location location) {
         try {
-            log.info("Fetching weather from OpenWeather for localization {}", localization.getId());
+            log.info("Fetching weather from OpenWeather for location {}", location.getId());
 
-            var response = openWeatherApiClient.getCurrentWeather(localization);
-            var weather = WeatherMapper.toEntity(localization, response);
+            var response = openWeatherApiClient.getCurrentWeather(location);
+            var weather = WeatherMapper.toEntity(location, response);
             var savedWeather = weatherRepository.save(weather);
 
             return WeatherMapper.toDTO(savedWeather);
@@ -75,14 +75,14 @@ public class OpenWeatherService {
         }
     }
 
-    private List<ForecastDTO> fetchAndSaveForecast(Localization localization) {
+    private List<ForecastDTO> fetchAndSaveForecast(Location location) {
         try {
-            log.info("Fetching forecast from OpenWeather for localization {}", localization.getId());
+            log.info("Fetching forecast from OpenWeather for location {}", location.getId());
 
-            var response = openWeatherApiClient.getForecast(localization);
-            var forecasts = ForecastMapper.toEntities(localization, response);
+            var response = openWeatherApiClient.getForecast(location);
+            var forecasts = ForecastMapper.toEntities(location, response);
 
-            forecastRepository.deleteByLocalizationId(localization.getId());
+            forecastRepository.deleteByLocationId(location.getId());
             var savedForecasts = forecastRepository.saveAll(forecasts);
 
             return ForecastMapper.toDTOList(savedForecasts);

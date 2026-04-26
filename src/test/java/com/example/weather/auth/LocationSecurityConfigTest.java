@@ -1,8 +1,8 @@
 package com.example.weather.auth;
 
-import com.example.weather.localization.Localization;
-import com.example.weather.localization.LocalizationController;
-import com.example.weather.localization.LocalizationService;
+import com.example.weather.location.Location;
+import com.example.weather.location.LocationController;
+import com.example.weather.location.LocationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(LocalizationController.class)
+@WebMvcTest(LocationController.class)
 @Import(SecurityConfig.class)
-class LocalizationSecurityConfigTest {
+class LocationSecurityConfigTest {
 
     private static final String CREATE_OR_UPDATE_PAYLOAD = """
             {
-              "city": "Warsaw",
+              "name": "Warsaw",
               "country": "Poland",
               "region": "Mazowieckie",
               "longitude": 21.0122,
@@ -43,7 +43,7 @@ class LocalizationSecurityConfigTest {
     private static final String ORDER_PAYLOAD = """
             [
               {
-                "localizationId": 1,
+                "locationId": 1,
                 "sortOrder": 1
               }
             ]
@@ -53,24 +53,24 @@ class LocalizationSecurityConfigTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private LocalizationService localizationService;
+    private LocationService locationService;
 
     @MockBean
     private DatabaseUserDetailsService userDetailsService;
 
     @Test
-    void getCities_isPublic() throws Exception {
-        when(localizationService.getAllLocalizations())
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
+    void getLocations_isPublic() throws Exception {
+        when(locationService.getSharedLocations())
+                .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
-        mockMvc.perform(get("/api/cities"))
+        mockMvc.perform(get("/api/locations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Warsaw"));
+                .andExpect(jsonPath("$[0].name").value("Warsaw"));
     }
 
     @Test
-    void anonymousUser_cannotCreateCity() throws Exception {
-        mockMvc.perform(post("/api/cities")
+    void anonymousUser_cannotCreateLocation() throws Exception {
+        mockMvc.perform(post("/api/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -78,8 +78,8 @@ class LocalizationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotUpdateCity() throws Exception {
-        mockMvc.perform(put("/api/cities/1")
+    void anonymousUser_cannotUpdateLocation() throws Exception {
+        mockMvc.perform(put("/api/locations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -87,8 +87,8 @@ class LocalizationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotReorderCities() throws Exception {
-        mockMvc.perform(put("/api/cities/order")
+    void anonymousUser_cannotReorderLocations() throws Exception {
+        mockMvc.perform(put("/api/locations/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ORDER_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -96,66 +96,66 @@ class LocalizationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotDeleteCity() throws Exception {
-        mockMvc.perform(delete("/api/cities/1"))
+    void anonymousUser_cannotDeleteLocation() throws Exception {
+        mockMvc.perform(delete("/api/locations/1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "http://localhost/login"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canCreateCity() throws Exception {
-        when(localizationService.createLocalization(
+    void adminUser_canCreateLocation() throws Exception {
+        when(locationService.createSharedLocation(
                 anyString(),
                 anyDouble(),
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
+        )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
-        mockMvc.perform(post("/api/cities")
+        mockMvc.perform(post("/api/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Warsaw"));
+                .andExpect(jsonPath("$.name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canUpdateCity() throws Exception {
-        when(localizationService.updateLocalization(
+    void adminUser_canUpdateLocation() throws Exception {
+        when(locationService.updateLocation(
                 anyLong(),
                 anyString(),
                 anyDouble(),
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
+        )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
-        mockMvc.perform(put("/api/cities/1")
+        mockMvc.perform(put("/api/locations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Warsaw"));
+                .andExpect(jsonPath("$.name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canReorderCities() throws Exception {
-        when(localizationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.localization.dto.OrderByDTO>>any()))
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
+    void adminUser_canReorderLocations() throws Exception {
+        when(locationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.location.dto.OrderByDTO>>any()))
+                .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
-        mockMvc.perform(put("/api/cities/order")
+        mockMvc.perform(put("/api/locations/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ORDER_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Warsaw"));
+                .andExpect(jsonPath("$[0].name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canDeleteCity() throws Exception {
-        mockMvc.perform(delete("/api/cities/1"))
+    void adminUser_canDeleteLocation() throws Exception {
+        mockMvc.perform(delete("/api/locations/1"))
                 .andExpect(status().isNoContent());
     }
 }

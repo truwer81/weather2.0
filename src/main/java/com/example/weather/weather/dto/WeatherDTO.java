@@ -3,8 +3,8 @@ package com.example.weather.weather.dto;
 import java.time.LocalDateTime;
 
 public record WeatherDTO(
-        Long localizationId,
-        String city,
+        Long locationId,
+        String name,
         String country,
         String region,
         Double latitude,
