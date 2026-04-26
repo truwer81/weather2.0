@@ -1,6 +1,6 @@
 package com.example.weather.weather;
 
-import com.example.weather.localization.Localization;
+import com.example.weather.location.Location;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,8 +23,8 @@ public class Forecast {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "localization_id", nullable = false)
-    private Localization localization;
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
 
     @Column(name = "forecast_time")
     private Timestamp forecastTime;

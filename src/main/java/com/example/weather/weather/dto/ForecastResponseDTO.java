@@ -8,7 +8,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ForecastResponseDTO(
         List<ForecastItemDTO> list,
-        CityDTO city
+        LocationDTO name
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record ForecastItemDTO(
@@ -56,7 +56,7 @@ public record ForecastResponseDTO(
     ) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record CityDTO(
+    public record LocationDTO(
             String name,
             String country,
             Integer timezone

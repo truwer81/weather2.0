@@ -174,7 +174,7 @@ async function renderLocations() {
 
 async function loadWeather(locationId) {
     try {
-        const response = await fetch(`/api/weather?cityId=${locationId}`);
+        const response = await fetch(`/api/weather?locationId=${locationId}`);
 
         if (!response.ok) {
             return null;
@@ -390,11 +390,11 @@ function buildActionsHtml() {
 
 async function persistSortOrder() {
     const payload = locationsState.map((location, index) => ({
-        localizationId: location.id,
+        locationId: location.id,
         sortOrder: index + 1
     }));
 
-    const response = await fetch("/api/cities/order", {
+    const response = await fetch("/api/locations/order", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -691,7 +691,7 @@ async function toggleForecastRow(locationRow, locationId) {
 }
 
 async function loadForecast(locationId) {
-    const response = await fetch(`/api/weather/forecast?cityId=${locationId}`);
+    const response = await fetch(`/api/weather/forecast?locationId=${locationId}`);
 
     if (!response.ok) {
         const error = await tryReadError(response);

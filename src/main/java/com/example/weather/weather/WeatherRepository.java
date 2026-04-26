@@ -7,5 +7,5 @@ import java.util.Optional;
 public interface WeatherRepository extends JpaRepository<Weather, Long> {
 
 
-    Optional<Weather> findTopByLocalizationIdOrderByFetchedAtDesc(Long localizationId);
+    Optional<Weather> findTopByLocationIdOrderByFetchedAtDesc(Long locationId);
 }

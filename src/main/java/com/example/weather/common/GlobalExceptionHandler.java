@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(LocalizationNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleLocalizationNotFound(
-            LocalizationNotFoundException ex,
+    @ExceptionHandler(LocationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLocationNotFound(
+            LocationNotFoundException ex,
             HttpServletRequest request
     ) {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);

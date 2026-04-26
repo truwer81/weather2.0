@@ -1,4 +1,4 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import com.example.weather.auth.AppUser;
 import jakarta.persistence.*;
@@ -12,13 +12,13 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "localizations")
-public class Localization {
+@Table(name = "locations")
+public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String city;
+    private String name;
     private String country;
     private String region;
     private Double longitude;

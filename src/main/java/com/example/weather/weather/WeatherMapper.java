@@ -1,6 +1,6 @@
 package com.example.weather.weather;
 
-import com.example.weather.localization.Localization;
+import com.example.weather.location.Location;
 import com.example.weather.weather.dto.WeatherDTO;
 import com.example.weather.weather.dto.WeatherResponseDTO;
 
@@ -14,10 +14,10 @@ public final class WeatherMapper {
     }
 
 
-    public static Weather toEntity(Localization localization, WeatherResponseDTO response) {
+    public static Weather toEntity(Location location, WeatherResponseDTO response) {
         Weather weather = new Weather();
 
-        weather.setLocalization(localization);
+        weather.setLocation(location);
         weather.setDescription(extractDescription(response));
         weather.setTemperature(extractTemperature(response));
         weather.setFeelsLike(extractFeelsLike(response));
@@ -34,12 +34,12 @@ public final class WeatherMapper {
 
     public static WeatherDTO toDTO(Weather weather) {
         return new WeatherDTO(
-                weather.getLocalization().getId(),
-                weather.getLocalization().getCity(),
-                weather.getLocalization().getCountry(),
-                weather.getLocalization().getRegion(),
-                weather.getLocalization().getLatitude(),
-                weather.getLocalization().getLongitude(),
+                weather.getLocation().getId(),
+                weather.getLocation().getName(),
+                weather.getLocation().getCountry(),
+                weather.getLocation().getRegion(),
+                weather.getLocation().getLatitude(),
+                weather.getLocation().getLongitude(),
                 weather.getProviderTimestamp(),
                 weather.getDescription(),
                 weather.getTemperature(),

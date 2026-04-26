@@ -1,7 +1,8 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import com.example.weather.auth.AppUser;
-import com.example.weather.localization.dto.OrderByDTO;
+import com.example.weather.auth.AppUserRepository;
+import com.example.weather.location.dto.OrderByDTO;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=validate",
         "spring.flyway.enabled=true"
 })
-@Import(LocalizationService.class)
+@Import(LocationService.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
-class LocalizationReorderPostgresIntegrationTest {
+class LocationReorderPostgresIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
@@ -39,29 +40,29 @@ class LocalizationReorderPostgresIntegrationTest {
     }
 
     @Autowired
-    private LocalizationRepository localizationRepository;
+    private LocationRepository locationRepository;
 
     @Autowired
-    private LocalizationService localizationService;
+    private LocationService locationService;
 
     @Autowired
-    private com.example.weather.auth.AppUserRepository appUserRepository;
+    private AppUserRepository appUserRepository;
 
     @Autowired
     private EntityManager entityManager;
 
     @Test
     void saveDisplayOrder_reordersSharedRowsWithoutAffectingPrivateRows() {
-        localizationRepository.deleteAllInBatch();
+        locationRepository.deleteAllInBatch();
         appUserRepository.deleteAllInBatch();
-        localizationRepository.flush();
+        locationRepository.flush();
         appUserRepository.flush();
 
-        Localization sharedFirst = localizationRepository.save(
-                new Localization(null, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)
+        Location sharedFirst = locationRepository.save(
+                new Location(null, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)
         );
-        Localization sharedSecond = localizationRepository.save(
-                new Localization(null, "Gdansk", "Poland", "Pomorskie", 18.6466, 54.3520, 2L, null)
+        Location sharedSecond = locationRepository.save(
+                new Location(null, "Gdansk", "Poland", "Pomorskie", 18.6466, 54.3520, 2L, null)
         );
 
         AppUser owner = appUserRepository.save(AppUser.builder()
@@ -71,28 +72,28 @@ class LocalizationReorderPostgresIntegrationTest {
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        Localization privateLocalization = localizationRepository.save(
-                new Localization(null, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner)
+        Location privateLocation = locationRepository.save(
+                new Location(null, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner)
         );
 
-        List<Localization> result = localizationService.saveDisplayOrder(List.of(
+        List<Location> result = locationService.saveDisplayOrder(List.of(
                 new OrderByDTO(sharedSecond.getId(), 1L),
                 new OrderByDTO(sharedFirst.getId(), 2L)
         ));
 
-        List<Localization> persistedSharedRows = localizationRepository.findAllByOwnerIsNullOrderBySortOrderAsc();
-        Localization persistedPrivateRow = localizationRepository.findById(privateLocalization.getId()).orElseThrow();
+        List<Location> persistedSharedRows = locationRepository.findAllByOwnerIsNullOrderBySortOrderAsc();
+        Location persistedPrivateRow = locationRepository.findById(privateLocation.getId()).orElseThrow();
 
         assertThat(result)
-                .extracting(Localization::getId)
+                .extracting(Location::getId)
                 .containsExactly(sharedSecond.getId(), sharedFirst.getId());
 
         assertThat(persistedSharedRows)
-                .extracting(Localization::getId)
+                .extracting(Location::getId)
                 .containsExactly(sharedSecond.getId(), sharedFirst.getId());
 
         assertThat(persistedSharedRows)
-                .extracting(Localization::getSortOrder)
+                .extracting(Location::getSortOrder)
                 .containsExactly(1L, 2L);
 
         assertThat(persistedPrivateRow.getOwner()).isNotNull();
@@ -100,35 +101,35 @@ class LocalizationReorderPostgresIntegrationTest {
     }
 
     @Test
-    void deletingUser_removesOwnedPrivateLocalizationsWithoutAffectingSharedRows() {
-        localizationRepository.deleteAllInBatch();
+    void deletingUser_removesOwnedPrivateLocationsWithoutAffectingSharedRows() {
+        locationRepository.deleteAllInBatch();
         appUserRepository.deleteAllInBatch();
-        localizationRepository.flush();
+        locationRepository.flush();
         appUserRepository.flush();
 
-        Localization sharedLocalization = localizationRepository.save(
-                new Localization(null, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)
+        var sharedLocation = locationRepository.save(
+                new Location(null, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)
         );
 
         AppUser owner = appUserRepository.save(AppUser.builder()
-                .username("owned-localizations-user")
+                .username("owned-locations-user")
                 .passwordHash("hash")
                 .enabled(true)
                 .createdAt(LocalDateTime.now())
                 .build());
 
-        Localization privateLocalization = localizationRepository.save(
-                new Localization(null, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner)
+        var privateLocation = locationRepository.save(
+                new Location(null, "Berlin", "Germany", "Berlin", 13.4050, 52.5200, 1L, owner)
         );
 
         appUserRepository.delete(owner);
         appUserRepository.flush();
         entityManager.clear();
 
-        assertThat(localizationRepository.findById(privateLocalization.getId())).isEmpty();
-        assertThat(localizationRepository.findById(sharedLocalization.getId())).isPresent();
-        assertThat(localizationRepository.findAllByOwnerIsNullOrderBySortOrderAsc())
-                .extracting(Localization::getId)
-                .containsExactly(sharedLocalization.getId());
+        assertThat(locationRepository.findById(privateLocation.getId())).isEmpty();
+        assertThat(locationRepository.findById(sharedLocation.getId())).isPresent();
+        assertThat(locationRepository.findAllByOwnerIsNullOrderBySortOrderAsc())
+                .extracting(Location::getId)
+                .containsExactly(sharedLocation.getId());
     }
 }

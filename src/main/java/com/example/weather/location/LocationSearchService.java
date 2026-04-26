@@ -1,10 +1,10 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import com.example.weather.common.BadRequestException;
 import com.example.weather.common.ExternalServiceException;
 import com.example.weather.common.OpenWeatherClientException;
-import com.example.weather.localization.dto.LocalizationSearchResultDTO;
-import com.example.weather.localization.dto.OpenWeatherGeocodingResponse;
+import com.example.weather.location.dto.LocationSearchResultDTO;
+import com.example.weather.location.dto.OpenWeatherGeocodingResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +14,13 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class LocalizationSearchService {
+public class LocationSearchService {
 
     private static final int DEFAULT_LIMIT = 5;
 
     private final OpenWeatherGeocodingClient openWeatherGeocodingClient;
 
-    public List<LocalizationSearchResultDTO> search(String query) {
+    public List<LocationSearchResultDTO> search(String query) {
         String normalizedQuery = normalizeQuery(query);
 
         try {
@@ -28,7 +28,7 @@ public class LocalizationSearchService {
                     .map(this::mapToResultDto)
                     .toList();
         } catch (OpenWeatherClientException e) {
-            throw new ExternalServiceException("Could not fetch localization suggestions from OpenWeather", e);
+            throw new ExternalServiceException("Could not fetch location suggestions from OpenWeather", e);
         }
     }
 
@@ -76,8 +76,8 @@ public class LocalizationSearchService {
         return String.format("%.4f", value);
     }
 
-    private LocalizationSearchResultDTO mapToResultDto(OpenWeatherGeocodingResponse item) {
-        return new LocalizationSearchResultDTO(
+    private LocationSearchResultDTO mapToResultDto(OpenWeatherGeocodingResponse item) {
+        return new LocationSearchResultDTO(
                 buildLabel(item),
                 safe(item.name()),
                 safe(item.state()),

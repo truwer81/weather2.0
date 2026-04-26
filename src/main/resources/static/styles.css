@@ -787,7 +787,7 @@ th .th-unit,
         min-height: 40px;
     }
 
-    /* Forecast row rendered below a location card. */
+    /* Forecast row rendered below a name card. */
     .locations-table > tbody > tr.forecast-details-row {
         display: block;
         width: 100%;

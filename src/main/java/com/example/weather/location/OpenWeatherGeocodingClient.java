@@ -1,7 +1,7 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import com.example.weather.common.OpenWeatherClientException;
-import com.example.weather.localization.dto.OpenWeatherGeocodingResponse;
+import com.example.weather.location.dto.OpenWeatherGeocodingResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

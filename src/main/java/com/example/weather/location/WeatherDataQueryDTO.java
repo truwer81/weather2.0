@@ -1,4 +1,4 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,8 +1,8 @@
 package com.example.weather.auth;
 
-import com.example.weather.localization.Localization;
-import com.example.weather.localization.LocalizationController;
-import com.example.weather.localization.LocalizationService;
+import com.example.weather.location.Location;
+import com.example.weather.location.LocationController;
+import com.example.weather.location.LocationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,13 +26,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(LocalizationController.class)
+@WebMvcTest(LocationController.class)
 @Import(SecurityConfig.class)
-class LocalizationSecurityConfigTest {
+class LocationSecurityConfigTest {
 
     private static final String CREATE_OR_UPDATE_PAYLOAD = """
             {
-              "city": "Warsaw",
+              "name": "Warsaw",
               "country": "Poland",
               "region": "Mazowieckie",
               "longitude": 21.0122,
@@ -43,7 +43,7 @@ class LocalizationSecurityConfigTest {
     private static final String ORDER_PAYLOAD = """
             [
               {
-                "localizationId": 1,
+                "locationId": 1,
                 "sortOrder": 1
               }
             ]
@@ -53,15 +53,15 @@ class LocalizationSecurityConfigTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private LocalizationService localizationService;
+    private LocationService locationService;
 
     @MockBean
     private DatabaseUserDetailsService userDetailsService;
 
     @Test
     void getCities_isPublic() throws Exception {
-        when(localizationService.getAllLocalizations())
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
+        when(locationService.getSharedLocations())
+                .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
         mockMvc.perform(get("/api/cities"))
                 .andExpect(status().isOk())
@@ -105,13 +105,13 @@ class LocalizationSecurityConfigTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminUser_canCreateCity() throws Exception {
-        when(localizationService.createLocalization(
+        when(locationService.createSharedLocation(
                 anyString(),
                 anyDouble(),
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
+        )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
         mockMvc.perform(post("/api/cities")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,14 +123,14 @@ class LocalizationSecurityConfigTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminUser_canUpdateCity() throws Exception {
-        when(localizationService.updateLocalization(
+        when(locationService.updateLocation(
                 anyLong(),
                 anyString(),
                 anyDouble(),
                 anyDouble(),
                 anyString(),
                 anyString()
-        )).thenReturn(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
+        )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
         mockMvc.perform(put("/api/cities/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -142,8 +142,8 @@ class LocalizationSecurityConfigTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminUser_canReorderCities() throws Exception {
-        when(localizationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.localization.dto.OrderByDTO>>any()))
-                .thenReturn(List.of(new Localization(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
+        when(locationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.location.dto.OrderByDTO>>any()))
+                .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
         mockMvc.perform(put("/api/cities/order")
                         .contentType(MediaType.APPLICATION_JSON)

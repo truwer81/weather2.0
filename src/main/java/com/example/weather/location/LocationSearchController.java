@@ -1,6 +1,6 @@
-package com.example.weather.localization;
+package com.example.weather.location;
 
-import com.example.weather.localization.dto.LocalizationSearchResultDTO;
+import com.example.weather.location.dto.LocationSearchResultDTO;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -15,12 +15,12 @@ import java.util.List;
 @RequestMapping("/api/locations")
 @RequiredArgsConstructor
 @Validated
-public class LocalizationSearchController {
+public class LocationSearchController {
 
-    private final LocalizationSearchService localizationSearchService;
+    private final LocationSearchService locationSearchService;
 
     @GetMapping("/search")
-    public List<LocalizationSearchResultDTO> search(@RequestParam("q") @NotBlank String query) {
-        return localizationSearchService.search(query);
+    public List<LocationSearchResultDTO> search(@RequestParam("q") @NotBlank String query) {
+        return locationSearchService.search(query);
     }
 }

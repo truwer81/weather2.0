@@ -203,7 +203,7 @@ docker compose -f docker-compose.prod.yml -p weather-prod down -v
 ## Local development users
 
 For manual local testing, example non-admin users can be inserted into the local database with the SQL stored in `dev-tools/local-users.sql`.
-
+pass: 'User1Test!' / 'User2Test!'
 These accounts are intended for local development only and should not be used in shared or production environments.
 ```shell
 INSERT INTO app_users (username, password_hash, enabled)
