@@ -61,7 +61,7 @@ class MyLocationsControllerSecurityTest {
 
         mockMvc.perform(get("/api/my/locations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Berlin"));
+                .andExpect(jsonPath("$[0].name").value("Berlin"));
     }
 
     @Test
@@ -89,7 +89,7 @@ class MyLocationsControllerSecurityTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Berlin"));
+                .andExpect(jsonPath("$.name").value("Berlin"));
     }
 
     private AppUser buildUser(Long id, String username) {

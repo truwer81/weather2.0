@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cities")
+@RequestMapping("/api/locations")
 @RequiredArgsConstructor
 public class LocationController {
 
@@ -32,7 +32,7 @@ public class LocationController {
     }
 
     @GetMapping
-    public List<LocationDTO> getAllCities() {
+    public List<LocationDTO> getSharedLocations() {
         return locationService.getSharedLocations()
                 .stream()
                 .map(LocationDTO::from)
@@ -41,7 +41,7 @@ public class LocationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCity(@PathVariable Long id) {
+    public void deleteLocation(@PathVariable Long id) {
         locationService.deleteLocation(id);
     }
 
@@ -62,7 +62,7 @@ public class LocationController {
     }
 
     @PutMapping("/order")
-    public List<LocationDTO> orderCities(@RequestBody List<OrderByDTO> orders) {
+    public List<LocationDTO> orderLocations(@RequestBody List<OrderByDTO> orders) {
         return locationService.saveDisplayOrder(orders)
                 .stream()
                 .map(LocationDTO::from)

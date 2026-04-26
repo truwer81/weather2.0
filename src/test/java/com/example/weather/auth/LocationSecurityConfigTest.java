@@ -59,18 +59,18 @@ class LocationSecurityConfigTest {
     private DatabaseUserDetailsService userDetailsService;
 
     @Test
-    void getCities_isPublic() throws Exception {
+    void getLocations_isPublic() throws Exception {
         when(locationService.getSharedLocations())
                 .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
-        mockMvc.perform(get("/api/cities"))
+        mockMvc.perform(get("/api/locations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Warsaw"));
+                .andExpect(jsonPath("$[0].name").value("Warsaw"));
     }
 
     @Test
-    void anonymousUser_cannotCreateCity() throws Exception {
-        mockMvc.perform(post("/api/cities")
+    void anonymousUser_cannotCreateLocation() throws Exception {
+        mockMvc.perform(post("/api/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -78,8 +78,8 @@ class LocationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotUpdateCity() throws Exception {
-        mockMvc.perform(put("/api/cities/1")
+    void anonymousUser_cannotUpdateLocation() throws Exception {
+        mockMvc.perform(put("/api/locations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -87,8 +87,8 @@ class LocationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotReorderCities() throws Exception {
-        mockMvc.perform(put("/api/cities/order")
+    void anonymousUser_cannotReorderLocations() throws Exception {
+        mockMvc.perform(put("/api/locations/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ORDER_PAYLOAD))
                 .andExpect(status().is3xxRedirection())
@@ -96,15 +96,15 @@ class LocationSecurityConfigTest {
     }
 
     @Test
-    void anonymousUser_cannotDeleteCity() throws Exception {
-        mockMvc.perform(delete("/api/cities/1"))
+    void anonymousUser_cannotDeleteLocation() throws Exception {
+        mockMvc.perform(delete("/api/locations/1"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", "http://localhost/login"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canCreateCity() throws Exception {
+    void adminUser_canCreateLocation() throws Exception {
         when(locationService.createSharedLocation(
                 anyString(),
                 anyDouble(),
@@ -113,16 +113,16 @@ class LocationSecurityConfigTest {
                 anyString()
         )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
-        mockMvc.perform(post("/api/cities")
+        mockMvc.perform(post("/api/locations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Warsaw"));
+                .andExpect(jsonPath("$.name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canUpdateCity() throws Exception {
+    void adminUser_canUpdateLocation() throws Exception {
         when(locationService.updateLocation(
                 anyLong(),
                 anyString(),
@@ -132,30 +132,30 @@ class LocationSecurityConfigTest {
                 anyString()
         )).thenReturn(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null));
 
-        mockMvc.perform(put("/api/cities/1")
+        mockMvc.perform(put("/api/locations/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CREATE_OR_UPDATE_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.city").value("Warsaw"));
+                .andExpect(jsonPath("$.name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canReorderCities() throws Exception {
+    void adminUser_canReorderLocations() throws Exception {
         when(locationService.saveDisplayOrder(org.mockito.ArgumentMatchers.<List<com.example.weather.location.dto.OrderByDTO>>any()))
                 .thenReturn(List.of(new Location(1L, "Warsaw", "Poland", "Mazowieckie", 21.0122, 52.2297, 1L, null)));
 
-        mockMvc.perform(put("/api/cities/order")
+        mockMvc.perform(put("/api/locations/order")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(ORDER_PAYLOAD))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].city").value("Warsaw"));
+                .andExpect(jsonPath("$[0].name").value("Warsaw"));
     }
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    void adminUser_canDeleteCity() throws Exception {
-        mockMvc.perform(delete("/api/cities/1"))
+    void adminUser_canDeleteLocation() throws Exception {
+        mockMvc.perform(delete("/api/locations/1"))
                 .andExpect(status().isNoContent());
     }
 }

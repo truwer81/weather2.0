@@ -130,15 +130,15 @@ class LocationRepositoryTest {
         assertThat(count).isEqualTo(1L);
     }
 
-    private Location persistSharedLocation(String city, Long sortOrder) {
-        var location = new Location(null, city, "Poland", "Region", 21.0, 52.0, sortOrder, null);
+    private Location persistSharedLocation(String name, Long sortOrder) {
+        var location = new Location(null, name, "Poland", "Region", 21.0, 52.0, sortOrder, null);
         return entityManager.persistAndFlush(location);
     }
 
-    private Location persistPrivateLocation(String city, Long sortOrder) {
-        AppUser owner = persistOwner(city.toLowerCase() + "_owner");
+    private Location persistPrivateLocation(String name, Long sortOrder) {
+        AppUser owner = persistOwner(name.toLowerCase() + "_owner");
 
-        var location = new Location(null, city, "Germany", "Region", 13.4, 52.5, sortOrder, owner);
+        var location = new Location(null, name, "Germany", "Region", 13.4, 52.5, sortOrder, owner);
         return entityManager.persistAndFlush(location);
     }
 

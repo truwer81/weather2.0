@@ -88,15 +88,15 @@ public class LocationSearchService {
     }
 
     private String buildLabel(OpenWeatherGeocodingResponse item) {
-        String city = safe(item.name());
-        String region = safe(item.state());
-        String country = safe(item.country());
+        var name = safe(item.name());
+        var region = safe(item.state());
+        var country = safe(item.country());
 
         if (!region.isBlank()) {
-            return city + ", " + region + ", " + country;
+            return name + ", " + region + ", " + country;
         }
 
-        return city + ", " + country;
+        return name + ", " + country;
     }
 
     private String safe(String value) {

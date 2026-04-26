@@ -23,9 +23,9 @@ public class LocationService {
     private final EntityManager entityManager;
 
     @Transactional
-    public Location createSharedLocation(String city, Double longitude, Double latitude, String region, String country) {
+    public Location createSharedLocation(String name, Double longitude, Double latitude, String region, String country) {
         validateCoordinates(longitude, latitude);
-        validateRequiredFields(city, country);
+        validateRequiredFields(name, country);
 
         if (region != null && region.isBlank()) {
             region = null;
@@ -36,7 +36,7 @@ public class LocationService {
                 .map(sortOrder -> sortOrder + 1)
                 .orElse(0L);
 
-        var location = new Location(null, city, country, region, longitude, latitude, topSortOrder, null);
+        var location = new Location(null, name, country, region, longitude, latitude, topSortOrder, null);
         return locationRepository.save(location);
     }
 
@@ -125,18 +125,18 @@ public class LocationService {
     public Location updatePrivateLocation(
             long ownerId,
             long locationId,
-            String city,
+            String name,
             Double longitude,
             Double latitude,
             String region,
             String country
     ) {
         validateCoordinates(longitude, latitude);
-        validateRequiredFields(city, country);
+        validateRequiredFields(name, country);
 
         var location = getOwnedLocation(ownerId, locationId);
 
-        location.setName(city.trim());
+        location.setName(name.trim());
         location.setCountry(country.trim());
         location.setRegion(region == null || region.isBlank() ? null : region.trim());
         location.setLongitude(longitude);
@@ -198,9 +198,9 @@ public class LocationService {
         }
     }
 
-    private void validateRequiredFields(String city, String country) {
-        if (city == null || city.isBlank()) {
-            throw new BadRequestException("City is required");
+    private void validateRequiredFields(String name, String country) {
+        if (name == null || name.isBlank()) {
+            throw new BadRequestException("Location name is required");
         }
 
         if (country == null || country.isBlank()) {

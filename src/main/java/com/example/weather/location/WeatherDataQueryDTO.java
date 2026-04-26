@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class WeatherDataQueryDTO {
     private Long id;
-    private String city;
+    private String name;
     private String country;
     private String region;
     private double longitude;
