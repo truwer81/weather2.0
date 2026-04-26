@@ -1,9 +1,9 @@
-const locationForm = document.getElementById("city-form");
-const locationsTableBody = document.getElementById("cities-table-body");
+const locationForm = document.getElementById("location-form");
+const locationsTableBody = document.getElementById("locations-table-body");
 const messageBox = document.getElementById("message");
 const reloadAllBtn = document.getElementById("reload-all-btn");
 const searchContainer = document.getElementById("location-search-container");
-const editingIdInput = document.getElementById("editing-id");
+const editingIdInput = document.getElementById("editing-location-id");
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const loginLink = document.getElementById("login-link");
@@ -48,7 +48,7 @@ locationForm.addEventListener("submit", async (event) => {
     const payload = serializeLocationFormValues();
 
     const isEdit = Boolean(editingId);
-    const url = isEdit ? `/api/cities/${editingId}` : "/api/cities";
+    const url = isEdit ? `/api/locations/${editingId}` : "/api/locations";
     const method = isEdit ? "PUT" : "POST";
 
     try {
@@ -115,7 +115,7 @@ function canManageLocations() {
 }
 
 function updateUiByAuth() {
-    const formPanel = document.getElementById("city-form-panel");
+    const formPanel = document.getElementById("location-form-panel");
 
     if (formPanel) {
         formPanel.style.display = canManageLocations() ? "block" : "none";
@@ -136,7 +136,7 @@ async function loadLocations() {
     clearMessage();
 
     try {
-        const response = await fetch("/api/cities");
+        const response = await fetch("/api/locations");
 
         if (!response.ok) {
             const errorMessage = await tryReadError(response);
@@ -246,7 +246,7 @@ function buildLocationRow(location, weather) {
         }
 
         try {
-            const response = await fetch(`/api/cities/${location.id}`, {
+            const response = await fetch(`/api/locations/${location.id}`, {
                 method: "DELETE"
             });
 
@@ -276,7 +276,7 @@ function buildLocationRow(location, weather) {
 
 function serializeLocationFormValues() {
     return {
-        city: document.getElementById("city").value.trim(),
+        name: document.getElementById("name").value.trim(),
         country: document.getElementById("country").value.trim(),
         region: document.getElementById("region").value.trim() || null,
         longitude: parseFloat(document.getElementById("longitude").value),
@@ -288,7 +288,7 @@ function startEdit(location) {
     resetLocationSearch(true);
 
     editingIdInput.value = location.id;
-    document.getElementById("city").value = location.name ?? "";
+    document.getElementById("name").value = location.name ?? "";
     document.getElementById("country").value = location.country ?? "";
     document.getElementById("region").value = location.region ?? "";
     document.getElementById("longitude").value = location.longitude ?? "";
@@ -611,7 +611,7 @@ function attachResultClickHandlers() {
             element.classList.add("selected");
 
             editingIdInput.value = "";
-            document.getElementById("city").value = element.dataset.name;
+            document.getElementById("name").value = element.dataset.name;
             document.getElementById("region").value = element.dataset.region;
             document.getElementById("country").value = element.dataset.country;
             document.getElementById("latitude").value = element.dataset.lat;
@@ -839,20 +839,20 @@ function groupForecastByDay(items) {
 function normalizeLocation(rawLocation) {
     return {
         ...rawLocation,
-        name: rawLocation.name ?? rawLocation.city ?? ""
+        name: rawLocation.name ?? ""
     };
 }
 
 function normalizeLocationSearchResult(rawResult) {
     return {
         ...rawResult,
-        name: rawResult.name ?? rawResult.city ?? "",
+        name: rawResult.name ?? "",
         label: rawResult.label ?? buildLocationSearchLabel(rawResult)
     };
 }
 
 function buildLocationSearchLabel(result) {
-    const name = result.name ?? result.city ?? "";
+    const name = result.name ?? "";
     const region = result.region?.trim();
     const country = result.country ?? "";
 
