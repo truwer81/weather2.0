@@ -8,8 +8,11 @@ const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const loginLink = document.getElementById("login-link");
 const logoutForm = document.getElementById("logout-form");
+const myLocationsPanel = document.getElementById("my-locations-panel");
+const myLocationsContent = document.getElementById("my-locations-content");
 
 let locationsState = [];
+let myLocationsState = [];
 let locationSearchRequestSeq = 0;
 
 let authState = {
@@ -24,7 +27,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAuthState();
     updateUiByAuth();
     renderLocationSearch();
+
+    const myLocationsPromise = canViewMyLocations()
+        ? loadMyLocations()
+        : Promise.resolve(clearMyLocationsView());
+
     await loadLocations();
+    await myLocationsPromise;
 });
 
 /* ------------------------------ UI events ------------------------------- */
@@ -33,6 +42,11 @@ reloadAllBtn.addEventListener("click", async () => {
     try {
         setFormBusy(true);
         await loadLocations();
+
+        if (canViewMyLocations()) {
+            await loadMyLocations();
+        }
+
         showMessage(t("messages.weatherDataRefreshed"), false);
     } catch (error) {
         showMessage(error.message, true);
@@ -114,11 +128,19 @@ function canManageLocations() {
     return authState.authenticated && authState.roles.includes("ROLE_ADMIN");
 }
 
+function canViewMyLocations() {
+    return authState.authenticated;
+}
+
 function updateUiByAuth() {
     const formPanel = document.getElementById("location-form-panel");
 
     if (formPanel) {
         formPanel.style.display = canManageLocations() ? "block" : "none";
+    }
+
+    if (myLocationsPanel) {
+        myLocationsPanel.style.display = canViewMyLocations() ? "block" : "none";
     }
 
     if (loginLink) {
@@ -162,6 +184,30 @@ async function loadLocations() {
     }
 }
 
+async function loadMyLocations() {
+    if (!myLocationsContent) {
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/my/locations");
+
+        if (!response.ok) {
+            const errorMessage = await tryReadError(response);
+            renderMyLocationsError(errorMessage || t("errors.myLocationsLoadFailed"));
+            return;
+        }
+
+        const rawLocations = await response.json();
+
+        myLocationsState = rawLocations.map((rawLocation) => normalizeLocation(rawLocation));
+
+        renderMyLocations();
+    } catch (error) {
+        renderMyLocationsError(error.message || t("errors.myLocationsLoadFailed"));
+    }
+}
+
 async function renderLocations() {
     locationsTableBody.innerHTML = "";
 
@@ -184,6 +230,87 @@ async function loadWeather(locationId) {
     } catch {
         return null;
     }
+}
+
+function renderMyLocations() {
+    if (!myLocationsContent) {
+        return;
+    }
+
+    if (!myLocationsState.length) {
+        myLocationsContent.innerHTML = `
+            <div>${escapeHtml(t("messages.noMyLocations"))}</div>
+        `;
+        return;
+    }
+
+    myLocationsContent.innerHTML = buildMyLocationsTable();
+}
+
+function renderMyLocationsError(message) {
+    if (!myLocationsContent) {
+        return;
+    }
+
+    myLocationsState = [];
+    myLocationsContent.innerHTML = `
+        <div class="message-error">${escapeHtml(message || t("errors.myLocationsLoadFailed"))}</div>
+    `;
+}
+
+function clearMyLocationsView() {
+    myLocationsState = [];
+
+    if (myLocationsContent) {
+        myLocationsContent.innerHTML = "";
+    }
+}
+
+function buildMyLocationsTable() {
+    const rows = myLocationsState
+        .map((location) => `
+            <tr>
+                <td data-label="${escapeHtml(t("labels.location"))}">
+                    <div class="cell-value location-value">
+                        ${buildLocationLabel(location)}
+                    </div>
+                </td>
+                <td data-label="${escapeHtml(t("labels.latitude"))}">
+                    <span class="cell-value">${formatNumber(location.latitude, 4)}</span>
+                </td>
+                <td data-label="${escapeHtml(t("labels.longitude"))}">
+                    <span class="cell-value">${formatNumber(location.longitude, 4)}</span>
+                </td>
+            </tr>
+        `)
+        .join("");
+
+    return `
+        <div class="table-wrapper">
+            <table class="locations-table">
+                <thead>
+                    <tr>
+                        <th class="col-location">
+                            <div class="th-stack">
+                                <span class="th-title">${escapeHtml(t("labels.location"))}</span>
+                            </div>
+                        </th>
+                        <th class="col-num">
+                            <div class="th-stack">
+                                <span class="th-title">${escapeHtml(t("labels.latitude"))}</span>
+                            </div>
+                        </th>
+                        <th class="col-num">
+                            <div class="th-stack">
+                                <span class="th-title">${escapeHtml(t("labels.longitude"))}</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
+    `;
 }
 
 /* --------------------------- Location actions --------------------------- */

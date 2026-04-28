@@ -31,6 +31,33 @@ public class OpenWeatherService {
     public WeatherDTO getWeatherForLocation(Long locationId) {
         var location = locationService.getSharedLocation(locationId);
 
+        return getWeatherForResolvedLocation(location);
+    }
+
+    @Transactional
+    public WeatherDTO getWeatherForOwnedLocation(Long ownerId, Long locationId) {
+        var location = locationService.getOwnedLocation(ownerId, locationId);
+
+        return getWeatherForResolvedLocation(location);
+    }
+
+    @Transactional
+    public List<ForecastDTO> getForecastsForLocation(Long locationId) {
+        var location = locationService.getSharedLocation(locationId);
+
+        return getForecastsForResolvedLocation(location);
+    }
+
+    @Transactional
+    public List<ForecastDTO> getForecastsForOwnedLocation(Long ownerId, Long locationId) {
+        var location = locationService.getOwnedLocation(ownerId, locationId);
+
+        return getForecastsForResolvedLocation(location);
+    }
+
+    private WeatherDTO getWeatherForResolvedLocation(Location location) {
+        var locationId = location.getId();
+
         return weatherRepository.findTopByLocationIdOrderByFetchedAtDesc(locationId)
                 .filter(weather -> !isWeatherExpired(weather))
                 .map(weather -> {
@@ -40,9 +67,8 @@ public class OpenWeatherService {
                 .orElseGet(() -> fetchAndSaveWeather(location));
     }
 
-    @Transactional
-    public List<ForecastDTO> getForecastsForLocation(Long locationId) {
-        var location = locationService.getSharedLocation(locationId);
+    private List<ForecastDTO> getForecastsForResolvedLocation(Location location) {
+        var locationId = location.getId();
         var forecasts = forecastRepository.findAllByLocationIdOrderByForecastTimeAsc(locationId);
 
         if (forecasts.isEmpty()) {

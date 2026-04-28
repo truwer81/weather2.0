@@ -22,6 +22,7 @@
 
         sections: {
             savedLocations: "Saved locations",
+            myLocations: "My locations",
             manageLocations: "Manage locations"
         },
 
@@ -94,13 +95,15 @@
             locationUpdated: "Location updated successfully.",
             locationDeleted: "Location deleted successfully.",
             displayOrderUpdated: "Display order updated.",
-            formFilledFromSearch: "Selected location loaded into the form."
+            formFilledFromSearch: "Selected location loaded into the form.",
+            noMyLocations: "No saved personal locations yet."
         },
 
         errors: {
             generic: "Something went wrong. Please try again.",
             requestFailed: "The request could not be completed. Please try again.",
             forecastLoadFailed: "Could not load forecast.",
+            myLocationsLoadFailed: "Could not load your saved locations.",
             noForecastData: "No forecast data",
             noSearchResults: "No results"
         },
