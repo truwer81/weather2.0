@@ -8,11 +8,8 @@ const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const loginLink = document.getElementById("login-link");
 const logoutForm = document.getElementById("logout-form");
-const myLocationsPanel = document.getElementById("my-locations-panel");
-const myLocationsContent = document.getElementById("my-locations-content");
 
 let locationsState = [];
-let myLocationsState = [];
 let locationSearchRequestSeq = 0;
 
 let authState = {
@@ -28,12 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateUiByAuth();
     renderLocationSearch();
 
-    const myLocationsPromise = canViewMyLocations()
-        ? loadMyLocations()
-        : Promise.resolve(clearMyLocationsView());
-
     await loadLocations();
-    await myLocationsPromise;
 });
 
 /* ------------------------------ UI events ------------------------------- */
@@ -42,11 +34,6 @@ reloadAllBtn.addEventListener("click", async () => {
     try {
         setFormBusy(true);
         await loadLocations();
-
-        if (canViewMyLocations()) {
-            await loadMyLocations();
-        }
-
         showMessage(t("messages.weatherDataRefreshed"), false);
     } catch (error) {
         showMessage(error.message, true);
@@ -60,9 +47,10 @@ locationForm.addEventListener("submit", async (event) => {
 
     const editingId = editingIdInput.value;
     const payload = serializeLocationFormValues();
+    const baseUrl = getLocationCrudBaseUrl();
 
     const isEdit = Boolean(editingId);
-    const url = isEdit ? `/api/locations/${editingId}` : "/api/locations";
+    const url = isEdit ? `${baseUrl}/${editingId}` : baseUrl;
     const method = isEdit ? "PUT" : "POST";
 
     try {
@@ -125,11 +113,47 @@ async function loadAuthState() {
 }
 
 function canManageLocations() {
-    return authState.authenticated && authState.roles.includes("ROLE_ADMIN");
+    return canUseManageLocationsUi();
 }
 
-function canViewMyLocations() {
+function isAuthenticated() {
     return authState.authenticated;
+}
+
+function isAdmin() {
+    return isAuthenticated() && authState.roles.includes("ROLE_ADMIN");
+}
+
+function canUseManageLocationsUi() {
+    return isAuthenticated();
+}
+
+function usesPrivateLocationSource() {
+    return isAuthenticated() && !isAdmin();
+}
+
+function getLocationsListUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations" : "/api/locations";
+}
+
+function getLocationCrudBaseUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations" : "/api/locations";
+}
+
+function getWeatherUrl(locationId) {
+    return usesPrivateLocationSource()
+        ? `/api/my/locations/${locationId}/weather`
+        : `/api/weather?locationId=${locationId}`;
+}
+
+function getForecastUrl(locationId) {
+    return usesPrivateLocationSource()
+        ? `/api/my/locations/${locationId}/forecast`
+        : `/api/weather/forecast?locationId=${locationId}`;
+}
+
+function getOrderUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations/order" : "/api/locations/order";
 }
 
 function updateUiByAuth() {
@@ -139,16 +163,12 @@ function updateUiByAuth() {
         formPanel.style.display = canManageLocations() ? "block" : "none";
     }
 
-    if (myLocationsPanel) {
-        myLocationsPanel.style.display = canViewMyLocations() ? "block" : "none";
-    }
-
     if (loginLink) {
-        loginLink.style.display = authState.authenticated ? "none" : "inline";
+        loginLink.style.display = isAuthenticated() ? "none" : "inline";
     }
 
     if (logoutForm) {
-        logoutForm.style.display = authState.authenticated ? "inline-block" : "none";
+        logoutForm.style.display = isAuthenticated() ? "inline-block" : "none";
     }
 }
 
@@ -158,7 +178,7 @@ async function loadLocations() {
     clearMessage();
 
     try {
-        const response = await fetch("/api/locations");
+        const response = await fetch(getLocationsListUrl());
 
         if (!response.ok) {
             const errorMessage = await tryReadError(response);
@@ -184,30 +204,6 @@ async function loadLocations() {
     }
 }
 
-async function loadMyLocations() {
-    if (!myLocationsContent) {
-        return;
-    }
-
-    try {
-        const response = await fetch("/api/my/locations");
-
-        if (!response.ok) {
-            const errorMessage = await tryReadError(response);
-            renderMyLocationsError(errorMessage || t("errors.myLocationsLoadFailed"));
-            return;
-        }
-
-        const rawLocations = await response.json();
-
-        myLocationsState = rawLocations.map((rawLocation) => normalizeLocation(rawLocation));
-
-        renderMyLocations();
-    } catch (error) {
-        renderMyLocationsError(error.message || t("errors.myLocationsLoadFailed"));
-    }
-}
-
 async function renderLocations() {
     locationsTableBody.innerHTML = "";
 
@@ -220,7 +216,7 @@ async function renderLocations() {
 
 async function loadWeather(locationId) {
     try {
-        const response = await fetch(`/api/weather?locationId=${locationId}`);
+        const response = await fetch(getWeatherUrl(locationId));
 
         if (!response.ok) {
             return null;
@@ -230,87 +226,6 @@ async function loadWeather(locationId) {
     } catch {
         return null;
     }
-}
-
-function renderMyLocations() {
-    if (!myLocationsContent) {
-        return;
-    }
-
-    if (!myLocationsState.length) {
-        myLocationsContent.innerHTML = `
-            <div>${escapeHtml(t("messages.noMyLocations"))}</div>
-        `;
-        return;
-    }
-
-    myLocationsContent.innerHTML = buildMyLocationsTable();
-}
-
-function renderMyLocationsError(message) {
-    if (!myLocationsContent) {
-        return;
-    }
-
-    myLocationsState = [];
-    myLocationsContent.innerHTML = `
-        <div class="message-error">${escapeHtml(message || t("errors.myLocationsLoadFailed"))}</div>
-    `;
-}
-
-function clearMyLocationsView() {
-    myLocationsState = [];
-
-    if (myLocationsContent) {
-        myLocationsContent.innerHTML = "";
-    }
-}
-
-function buildMyLocationsTable() {
-    const rows = myLocationsState
-        .map((location) => `
-            <tr>
-                <td data-label="${escapeHtml(t("labels.location"))}">
-                    <div class="cell-value location-value">
-                        ${buildLocationLabel(location)}
-                    </div>
-                </td>
-                <td data-label="${escapeHtml(t("labels.latitude"))}">
-                    <span class="cell-value">${formatNumber(location.latitude, 4)}</span>
-                </td>
-                <td data-label="${escapeHtml(t("labels.longitude"))}">
-                    <span class="cell-value">${formatNumber(location.longitude, 4)}</span>
-                </td>
-            </tr>
-        `)
-        .join("");
-
-    return `
-        <div class="table-wrapper">
-            <table class="locations-table">
-                <thead>
-                    <tr>
-                        <th class="col-location">
-                            <div class="th-stack">
-                                <span class="th-title">${escapeHtml(t("labels.location"))}</span>
-                            </div>
-                        </th>
-                        <th class="col-num">
-                            <div class="th-stack">
-                                <span class="th-title">${escapeHtml(t("labels.latitude"))}</span>
-                            </div>
-                        </th>
-                        <th class="col-num">
-                            <div class="th-stack">
-                                <span class="th-title">${escapeHtml(t("labels.longitude"))}</span>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>
-    `;
 }
 
 /* --------------------------- Location actions --------------------------- */
@@ -373,7 +288,7 @@ function buildLocationRow(location, weather) {
         }
 
         try {
-            const response = await fetch(`/api/locations/${location.id}`, {
+            const response = await fetch(`${getLocationCrudBaseUrl()}/${location.id}`, {
                 method: "DELETE"
             });
 
@@ -473,7 +388,7 @@ function buildActionsHtml() {
     const moveUpTitle = escapeHtml(t("buttons.moveUp"));
     const moveDownTitle = escapeHtml(t("buttons.moveDown"));
 
-    if (!canManageLocations()) {
+    if (!canUseManageLocationsUi()) {
         return `
             <div class="actions">
                 <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">
@@ -521,7 +436,7 @@ async function persistSortOrder() {
         sortOrder: index + 1
     }));
 
-    const response = await fetch("/api/locations/order", {
+    const response = await fetch(getOrderUrl(), {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -563,7 +478,7 @@ const debouncedLocationSearch = debounce(() => {
 }, 300);
 
 function renderLocationSearch() {
-    if (!canManageLocations()) {
+    if (!canUseManageLocationsUi()) {
         return;
     }
 
@@ -818,7 +733,7 @@ async function toggleForecastRow(locationRow, locationId) {
 }
 
 async function loadForecast(locationId) {
-    const response = await fetch(`/api/weather/forecast?locationId=${locationId}`);
+    const response = await fetch(getForecastUrl(locationId));
 
     if (!response.ok) {
         const error = await tryReadError(response);
