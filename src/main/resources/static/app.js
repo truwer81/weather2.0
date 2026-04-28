@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadAuthState();
     updateUiByAuth();
     renderLocationSearch();
+
     await loadLocations();
 });
 
@@ -46,9 +47,10 @@ locationForm.addEventListener("submit", async (event) => {
 
     const editingId = editingIdInput.value;
     const payload = serializeLocationFormValues();
+    const baseUrl = getLocationCrudBaseUrl();
 
     const isEdit = Boolean(editingId);
-    const url = isEdit ? `/api/locations/${editingId}` : "/api/locations";
+    const url = isEdit ? `${baseUrl}/${editingId}` : baseUrl;
     const method = isEdit ? "PUT" : "POST";
 
     try {
@@ -111,7 +113,47 @@ async function loadAuthState() {
 }
 
 function canManageLocations() {
-    return authState.authenticated && authState.roles.includes("ROLE_ADMIN");
+    return canUseManageLocationsUi();
+}
+
+function isAuthenticated() {
+    return authState.authenticated;
+}
+
+function isAdmin() {
+    return isAuthenticated() && authState.roles.includes("ROLE_ADMIN");
+}
+
+function canUseManageLocationsUi() {
+    return isAuthenticated();
+}
+
+function usesPrivateLocationSource() {
+    return isAuthenticated() && !isAdmin();
+}
+
+function getLocationsListUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations" : "/api/locations";
+}
+
+function getLocationCrudBaseUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations" : "/api/locations";
+}
+
+function getWeatherUrl(locationId) {
+    return usesPrivateLocationSource()
+        ? `/api/my/locations/${locationId}/weather`
+        : `/api/weather?locationId=${locationId}`;
+}
+
+function getForecastUrl(locationId) {
+    return usesPrivateLocationSource()
+        ? `/api/my/locations/${locationId}/forecast`
+        : `/api/weather/forecast?locationId=${locationId}`;
+}
+
+function getOrderUrl() {
+    return usesPrivateLocationSource() ? "/api/my/locations/order" : "/api/locations/order";
 }
 
 function updateUiByAuth() {
@@ -122,11 +164,11 @@ function updateUiByAuth() {
     }
 
     if (loginLink) {
-        loginLink.style.display = authState.authenticated ? "none" : "inline";
+        loginLink.style.display = isAuthenticated() ? "none" : "inline";
     }
 
     if (logoutForm) {
-        logoutForm.style.display = authState.authenticated ? "inline-block" : "none";
+        logoutForm.style.display = isAuthenticated() ? "inline-block" : "none";
     }
 }
 
@@ -136,7 +178,7 @@ async function loadLocations() {
     clearMessage();
 
     try {
-        const response = await fetch("/api/locations");
+        const response = await fetch(getLocationsListUrl());
 
         if (!response.ok) {
             const errorMessage = await tryReadError(response);
@@ -174,7 +216,7 @@ async function renderLocations() {
 
 async function loadWeather(locationId) {
     try {
-        const response = await fetch(`/api/weather?locationId=${locationId}`);
+        const response = await fetch(getWeatherUrl(locationId));
 
         if (!response.ok) {
             return null;
@@ -246,7 +288,7 @@ function buildLocationRow(location, weather) {
         }
 
         try {
-            const response = await fetch(`/api/locations/${location.id}`, {
+            const response = await fetch(`${getLocationCrudBaseUrl()}/${location.id}`, {
                 method: "DELETE"
             });
 
@@ -346,7 +388,7 @@ function buildActionsHtml() {
     const moveUpTitle = escapeHtml(t("buttons.moveUp"));
     const moveDownTitle = escapeHtml(t("buttons.moveDown"));
 
-    if (!canManageLocations()) {
+    if (!canUseManageLocationsUi()) {
         return `
             <div class="actions">
                 <button type="button" class="btn btn-primary btn-md btn-action action-btn forecast-btn">
@@ -394,7 +436,7 @@ async function persistSortOrder() {
         sortOrder: index + 1
     }));
 
-    const response = await fetch("/api/locations/order", {
+    const response = await fetch(getOrderUrl(), {
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -436,7 +478,7 @@ const debouncedLocationSearch = debounce(() => {
 }, 300);
 
 function renderLocationSearch() {
-    if (!canManageLocations()) {
+    if (!canUseManageLocationsUi()) {
         return;
     }
 
@@ -691,7 +733,7 @@ async function toggleForecastRow(locationRow, locationId) {
 }
 
 async function loadForecast(locationId) {
-    const response = await fetch(`/api/weather/forecast?locationId=${locationId}`);
+    const response = await fetch(getForecastUrl(locationId));
 
     if (!response.ok) {
         const error = await tryReadError(response);

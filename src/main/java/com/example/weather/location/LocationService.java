@@ -56,6 +56,12 @@ public class LocationService {
                 .orElseThrow(() -> new LocationNotFoundException(id));
     }
 
+    @Transactional(readOnly = true)
+    public Location getOwnedLocation(Long ownerId, Long locationId) {
+        return locationRepository.findByIdAndOwnerId(locationId, ownerId)
+                .orElseThrow(() -> new LocationNotFoundException(locationId));
+    }
+
     @Transactional
     public void deleteLocation(long locationId) {
         var location = getSharedLocation(locationId);
@@ -254,10 +260,5 @@ public class LocationService {
         if (ownedCount != uniqueIds.size()) {
             throw new BadRequestException("Display order payload can contain owned locations only");
         }
-    }
-
-    private Location getOwnedLocation(Long ownerId, Long locationId) {
-        return locationRepository.findByIdAndOwnerId(locationId, ownerId)
-                .orElseThrow(() -> new LocationNotFoundException(locationId));
     }
 }

@@ -1,18 +1,18 @@
 (function () {
     const APP_TEXT = {
         app: {
-            title: "Weather 2.2",
+            title: "Weather 2.0",
             subtitle: "Current weather overview and forecast for saved locations",
             footerAuthor: "Created by Jakub Heppner",
-            footerVersionLabel: "Version 2.2"
+            footerVersionLabel: "App version 2.2"
         },
 
         auth: {
-            loginPageTitle: "Login - Weather 2.2",
+            loginPageTitle: "Login - Weather 2.0",
             loginLink: "Login",
             logoutLink: "Logout",
             loginTitle: "Please sign in",
-            loginSubtitle: "Sign in to manage saved locations in Weather 2.2.",
+            loginSubtitle: "Sign in to manage saved locations in Weather 2.0.",
             usernameLabel: "Username",
             passwordLabel: "Password",
             signInButton: "Sign in",
