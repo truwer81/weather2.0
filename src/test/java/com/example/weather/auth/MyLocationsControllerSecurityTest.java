@@ -1,6 +1,7 @@
 package com.example.weather.auth;
 
 import com.example.weather.location.Location;
+import com.example.weather.location.LocationMapperImpl;
 import com.example.weather.location.LocationService;
 import com.example.weather.location.MyLocationsController;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MyLocationsController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, LocationMapperImpl.class})
 class MyLocationsControllerSecurityTest {
 
     private static final String CREATE_PAYLOAD = """

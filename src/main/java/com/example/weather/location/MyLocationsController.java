@@ -21,15 +21,13 @@ public class MyLocationsController {
 
     private final LocationService locationService;
     private final AppUserRepository appUserRepository;
+    private final LocationMapper locationMapper;
 
     @GetMapping
     public List<LocationDTO> getMyLocations(Authentication authentication) {
         var ownerId = getCurrentUserId(authentication);
 
-        return locationService.getPrivateLocations(ownerId)
-                .stream()
-                .map(LocationDTO::from)
-                .toList();
+        return locationMapper.toDTOList(locationService.getPrivateLocations(ownerId));
     }
 
     @PostMapping
@@ -48,7 +46,7 @@ public class MyLocationsController {
                 request.country()
         );
 
-        return LocationDTO.from(location);
+        return locationMapper.toDTO(location);
     }
 
     @PutMapping("/{id}")
@@ -69,7 +67,7 @@ public class MyLocationsController {
                 request.country()
         );
 
-        return LocationDTO.from(location);
+        return locationMapper.toDTO(location);
     }
 
     @DeleteMapping("/{id}")
@@ -86,10 +84,7 @@ public class MyLocationsController {
     ) {
         var ownerId = getCurrentUserId(authentication);
 
-        return locationService.savePrivateDisplayOrder(ownerId, orders)
-                .stream()
-                .map(LocationDTO::from)
-                .toList();
+        return locationMapper.toDTOList(locationService.savePrivateDisplayOrder(ownerId, orders));
     }
 
     private Long getCurrentUserId(Authentication authentication) {

@@ -17,6 +17,7 @@ import java.util.List;
 public class LocationController {
 
     private final LocationService locationService;
+    private final LocationMapper locationMapper;
 
     @PostMapping
     public LocationDTO createLocation(@Valid @RequestBody CreateLocationRequest request) {
@@ -28,15 +29,12 @@ public class LocationController {
                 request.country()
         );
 
-        return LocationDTO.from(location);
+        return locationMapper.toDTO(location);
     }
 
     @GetMapping
     public List<LocationDTO> getSharedLocations() {
-        return locationService.getSharedLocations()
-                .stream()
-                .map(LocationDTO::from)
-                .toList();
+        return locationMapper.toDTOList(locationService.getSharedLocations());
     }
 
     @DeleteMapping("/{id}")
@@ -58,14 +56,11 @@ public class LocationController {
                 request.region(),
                 request.country()
         );
-        return LocationDTO.from(location);
+        return locationMapper.toDTO(location);
     }
 
     @PutMapping("/order")
     public List<LocationDTO> orderLocations(@RequestBody List<OrderByDTO> orders) {
-        return locationService.saveDisplayOrder(orders)
-                .stream()
-                .map(LocationDTO::from)
-                .toList();
+        return locationMapper.toDTOList(locationService.saveDisplayOrder(orders));
     }
 }
