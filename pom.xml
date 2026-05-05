@@ -16,7 +16,7 @@
     <artifactId>weather-app</artifactId>
     <version>2.2.0</version>
     <name>Weather 2.0</name>
-    <description>Weather application migrated to Spring Boot</description>
+    <description>Spring Boot backend weather application with REST API, PostgreSQL, Flyway, Spring Security and OpenWeather integration</description>
 
     <properties>
         <java.version>21</java.version>

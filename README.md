@@ -1,5 +1,7 @@
 # Weather 2.0
 
+![Weather 2.0 project cover](docs/images/weather-2-social-cover.png)
+
 Weather 2.0 is a backend Spring Boot application written in Java.  
 It exposes REST endpoints for shared and private locations, current weather, and forecast data, and uses PostgreSQL as its database.
 
@@ -9,6 +11,10 @@ Project status: actively developed portfolio backend project.
 
 Current scope includes shared locations, authenticated user-specific private locations, OpenWeather integration, weather and forecast retrieval, 
 authentication, and admin access separation.
+
+## Tech stack
+
+Java 21 • Spring Boot 3 • REST API • PostgreSQL • Flyway • Spring Security • MapStruct • Docker • JUnit • Testcontainers
 
 ---
 
@@ -24,6 +30,10 @@ authentication, and admin access separation.
 - Automated tests including security and persistence coverage
 
 ---
+
+## Application preview
+
+![Weather 2.0 application preview](docs/images/weather-2-application-preview.png)
 
 ## Domain and access model
 
