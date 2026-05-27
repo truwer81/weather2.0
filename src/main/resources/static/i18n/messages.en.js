@@ -9,8 +9,10 @@
 
         auth: {
             loginPageTitle: "Login - Weather 2.0",
-            loginLink: "Login",
+            loginLink: "Sign in",
+            registerLink: "Create account",
             logoutLink: "Logout",
+            signedInAs: "Signed in as {username}",
             loginTitle: "Please sign in",
             loginSubtitle: "Sign in to manage saved locations in Weather 2.0.",
             usernameLabel: "Username",

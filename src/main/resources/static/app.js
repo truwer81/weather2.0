@@ -7,7 +7,9 @@ const editingIdInput = document.getElementById("editing-location-id");
 const submitBtn = document.getElementById("submit-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const loginLink = document.getElementById("login-link");
+const registerLink = document.getElementById("register-link");
 const logoutForm = document.getElementById("logout-form");
+const authStatus = document.getElementById("auth-status");
 
 let locationsState = [];
 let locationSearchRequestSeq = 0;
@@ -167,8 +169,19 @@ function updateUiByAuth() {
         loginLink.style.display = isAuthenticated() ? "none" : "inline";
     }
 
+    if (registerLink) {
+        registerLink.style.display = isAuthenticated() ? "none" : "inline";
+    }
+
     if (logoutForm) {
         logoutForm.style.display = isAuthenticated() ? "inline-block" : "none";
+    }
+
+    if (authStatus) {
+        authStatus.hidden = !isAuthenticated();
+        authStatus.textContent = isAuthenticated()
+            ? t("auth.signedInAs", {username: authState.username})
+            : "";
     }
 }
 

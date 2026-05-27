@@ -15,13 +15,17 @@
         </p>
 
 
-        <!-- Authentication actions -->
-        <div class="auth-links">
-            <a href="/login" id="login-link" data-i18n="auth.loginLink">Login</a>
+        <div class="auth-nav">
+            <div class="auth-links">
+                <a href="/login" id="login-link" data-i18n="auth.loginLink">Sign in</a>
+                <a href="/register" id="register-link" data-i18n="auth.registerLink">Create account</a>
 
-            <form action="/logout" method="post" class="logout-form" id="logout-form">
-                <button type="submit" class="link-button" data-i18n="auth.logoutLink">Logout</button>
-            </form>
+                <form action="/logout" method="post" class="logout-form" id="logout-form">
+                    <button type="submit" class="link-button" data-i18n="auth.logoutLink">Logout</button>
+                </form>
+            </div>
+
+            <div class="auth-status" id="auth-status" hidden></div>
         </div>
     </header>
 

@@ -212,11 +212,20 @@ input:disabled {
 
 /* ------------------------------ Auth area ------------------------------- */
 
+.auth-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 8px;
+}
+
 .auth-links {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 14px;
-    margin-top: 8px;
 }
 
 .auth-links a,
@@ -255,6 +264,13 @@ input:disabled {
 .logout-form {
     margin: 0;
     padding: 0;
+}
+
+.auth-status {
+    margin-left: auto;
+    color: #d0d7e2;
+    font-size: 14px;
+    text-align: right;
 }
 
 /* ------------------------------ Messages ------------------------------- */
