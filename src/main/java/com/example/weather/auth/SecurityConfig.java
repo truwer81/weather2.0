@@ -27,6 +27,8 @@ public class SecurityConfig {
                                 "/index.html",
                                 "/login",
                                 "/register",
+                                "/favicon.ico",
+                                "/icons/**",
                                 "/styles.css",
                                 "/login.css",
                                 "/app.js",
