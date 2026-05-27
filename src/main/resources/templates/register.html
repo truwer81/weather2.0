@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account - Weather 2.0</title>
+
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/login.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <h1>Create account</h1>
+        <p class="subtitle">
+            Register to manage your saved locations in Weather 2.0.
+        </p>
+    </header>
+
+    <section class="panel login-panel" id="register-panel">
+        <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="login-form">
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input
+                        type="text"
+                        id="username"
+                        th:field="*{username}"
+                        autocomplete="username"
+                        required
+                        autofocus
+                >
+                <small>
+                    Use 3–30 characters: lowercase letters, numbers, underscores, or hyphens. Uppercase letters will be saved as lowercase.
+                </small>
+                <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="message-error"></div>
+            </div>
+
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input
+                        type="password"
+                        id="password"
+                        th:field="*{password}"
+                        autocomplete="new-password"
+                        required
+                >
+                <small>Minimum 8 characters.</small>
+                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="message-error"></div>
+            </div>
+
+            <div class="form-field">
+                <label for="confirmPassword">Confirm password</label>
+                <input
+                        type="password"
+                        id="confirmPassword"
+                        th:field="*{confirmPassword}"
+                        autocomplete="new-password"
+                        required
+                >
+                <div
+                        th:if="${#fields.hasErrors('confirmPassword')}"
+                        th:errors="*{confirmPassword}"
+                        class="message-error"
+                ></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg login-submit-btn">
+                    Create account
+                </button>
+            </div>
+
+            <p class="login-message">
+                Already have an account?
+                <a href="/login">Sign in</a>
+            </p>
+        </form>
+    </section>
+</div>
+
+<footer class="footer">
+    <div>Created by Jakub Heppner</div>
+    <div>jakub.heppner@gmail.com</div>
+    <div>App version 2.2</div>
+</footer>
+
+<script>
+    async function initRegisterPage() {
+        const registerPanel = document.getElementById("register-panel");
+
+        try {
+            const response = await fetch("/api/auth/me", {
+                credentials: "same-origin"
+            });
+
+            if (response.ok) {
+                const auth = await response.json();
+
+                if (auth.authenticated) {
+                    window.location.replace("/");
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error("Could not verify auth state on register page:", error);
+        }
+
+        if (registerPanel) {
+            registerPanel.style.visibility = "visible";
+        }
+    }
+
+    initRegisterPage();
+</script>
+</body>
+</html>

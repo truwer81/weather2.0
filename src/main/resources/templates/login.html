@@ -27,6 +27,10 @@
             You have been logged out.
         </div>
 
+        <div th:if="${param.registered}" class="message-success login-message">
+            Account created. You can now sign in.
+        </div>
+
         <form th:action="@{/login}" method="post" class="login-form">
             <div class="form-field">
                 <label for="username" data-i18n="auth.usernameLabel">Username</label>
@@ -60,6 +64,11 @@
                     Sign in
                 </button>
             </div>
+
+            <p class="login-message">
+                No account yet?
+                <a href="/register">Create account</a>
+            </p>
         </form>
     </section>
 </div>
